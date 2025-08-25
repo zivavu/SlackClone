@@ -61,16 +61,6 @@ export default function ClientPage() {
 							/>
 						</svg>
 					</button>
-					<div className="hidden sm:flex items-center gap-1 rounded px-2 py-1 bg-white/10">
-						<span className="text-xs font-medium">Acme co</span>
-						<svg
-							viewBox="0 0 24 24"
-							className="size-4 text-white/70"
-							fill="currentColor"
-							aria-hidden>
-							<path d="M7 10l5 5 5-5H7z" />
-						</svg>
-					</div>
 
 					{/* Search */}
 					<div className="flex-1 flex justify-center">
