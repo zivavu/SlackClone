@@ -1,5 +1,7 @@
+import Link from 'next/link';
+
 type Props = {
-	channels: string[];
+	channels: { id: string; name: string }[];
 	directMessages: { name: string; status: 'online' | 'away' | 'offline' }[];
 };
 
@@ -60,13 +62,13 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 					</p>
 					<ul className="mt-1">
 						{channels.map((ch) => (
-							<li key={ch}>
-								<a
-									href="#"
+							<li key={ch.id}>
+								<Link
+									href={`/client/${ch.id}`}
 									className="flex items-center gap-2 rounded px-2 py-1.5 text-white/90 hover:bg-white/5">
 									<span className="text-white/50">#</span>
-									<span className="truncate">{ch}</span>
-								</a>
+									<span className="truncate">{ch.name}</span>
+								</Link>
 							</li>
 						))}
 					</ul>

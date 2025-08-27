@@ -1,13 +1,21 @@
-export function ChannelHeader() {
+export function ChannelHeader({
+	name,
+	topic,
+}: {
+	name: string;
+	topic?: string;
+}) {
 	return (
 		<header className="h-14 flex items-center justify-between border-b border-white/10 px-3 sm:px-4 bg-black/30 backdrop-blur">
 			<div className="min-w-0 flex items-center gap-2">
 				<h1 className="truncate text-sm sm:text-base font-semibold">
-					# general
+					# {name}
 				</h1>
-				<span className="hidden sm:inline text-xs text-white/60">
-					Company-wide announcements and work-based matters
-				</span>
+				{topic ? (
+					<span className="hidden sm:inline text-xs text-white/60">
+						{topic}
+					</span>
+				) : null}
 			</div>
 			<div className="flex items-center gap-1.5">
 				<button
