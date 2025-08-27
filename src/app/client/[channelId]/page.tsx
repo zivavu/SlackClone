@@ -3,12 +3,23 @@ import { ChannelHeader } from '@/components/ChannelHeader';
 import { ChannelsSidebar } from '@/components/ChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
-import { MessagesList } from '@/components/MessagesList';
+import { MessagesList, type Message } from '@/components/MessagesList';
 import { channels } from '@/data/channels';
+import { getDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 import { notFound } from 'next/navigation';
+import { postMessage } from './actions';
 
 type Params = {
 	params: Promise<{ channelId: string }>;
+};
+
+type MessageRow = {
+	_id: ObjectId;
+	author?: string;
+	initials?: string;
+	createdAt?: Date | string | number;
+	content?: string;
 };
 
 export default async function ChannelPage({ params }: Params) {
@@ -25,15 +36,30 @@ export default async function ChannelPage({ params }: Params) {
 		{ name: 'Margaret Hamilton', status: 'offline' as const },
 	];
 
-	const messages = [
-		{
-			id: 1,
-			author: 'Ada Lovelace',
-			initials: 'AL',
-			timestamp: '9:12 AM',
-			content: `Welcome to #${channel.name}! This is now routed by UUID: ${channel.id}`,
-		},
-	];
+	const db = await getDb();
+	const docs = (await db
+		.collection('messages')
+		.find({ channelId })
+		.sort({ createdAt: 1 })
+		.toArray()) as MessageRow[];
+
+	const messages: Message[] = docs.map((d) => ({
+		id: String(d._id),
+		author: d.author ?? 'Unknown',
+		initials:
+			d.initials && d.initials.length > 0
+				? d.initials
+				: String(d.author ?? 'U')
+						.split(' ')
+						.map((n: string) => n[0])
+						.slice(0, 2)
+						.join(''),
+		timestamp: new Date(d.createdAt ?? Date.now()).toLocaleTimeString('en-US', {
+			hour: 'numeric',
+			minute: '2-digit',
+		}),
+		content: d.content ?? '',
+	}));
 
 	return (
 		<div className="h-svh flex flex-col bg-gradient-to-b from-[#330d38] to-[#230525] text-foreground">
@@ -46,8 +72,12 @@ export default async function ChannelPage({ params }: Params) {
 				/>
 				<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21]">
 					<ChannelHeader name={channel.name} topic={channel.topic} />
-					<MessagesList messages={messages} />
-					<Composer placeholder={`Message #${channel.name}`} />
+					<MessagesList messages={messages} channelId={channel.id} />
+					<Composer
+						action={postMessage}
+						channelId={channel.id}
+						placeholder={`Message #${channel.name}`}
+					/>
 				</main>
 			</div>
 		</div>

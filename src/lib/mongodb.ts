@@ -12,7 +12,7 @@ let cachedDb: Db | null = null;
 
 export async function getMongoClient(): Promise<MongoClient> {
 	if (cachedClient) return cachedClient;
-	const client = new MongoClient(uri);
+	const client = new MongoClient(uri!);
 	cachedClient = await client.connect();
 	return cachedClient;
 }

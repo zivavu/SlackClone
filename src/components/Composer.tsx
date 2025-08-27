@@ -1,20 +1,46 @@
+'use client';
+
+import { useRef } from 'react';
+
 export function Composer({
 	placeholder = 'Message #general',
+	action,
+	channelId,
+	author = 'You',
 }: {
 	placeholder?: string;
+	action?: (formData: FormData) => Promise<void>;
+	channelId?: string;
+	author?: string;
 }) {
+	const formRef = useRef<HTMLFormElement | null>(null);
+
+	function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+		if (e.key === 'Enter' && !e.shiftKey) {
+			e.preventDefault();
+			formRef.current?.requestSubmit();
+		}
+	}
+
 	return (
 		<footer className="border-t border-white/10 p-2 sm:p-3">
-			<form className="rounded-xl bg-[#222529] focus-within:ring-2 focus-within:ring-white/20">
+			<form
+				ref={formRef}
+				action={action}
+				className="rounded-xl bg-[#222529] focus-within:ring-2 focus-within:ring-white/20">
+				<input type="hidden" name="channelId" value={channelId} />
+				<input type="hidden" name="author" value={author} />
 				<div className="px-2 sm:px-3 py-2">
 					<label className="sr-only" htmlFor="message">
 						Message
 					</label>
 					<textarea
 						id="message"
-						rows={1}
+						name="content"
 						placeholder={placeholder}
 						className="w-full resize-none bg-transparent outline-none placeholder:text-white/40 text-[15px]"
+						required
+						onKeyDown={handleKeyDown}
 					/>
 				</div>
 				<div className="flex items-center justify-between px-2 sm:px-3 pb-2 gap-1">
