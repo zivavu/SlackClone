@@ -8,7 +8,7 @@ import { channels } from '@/data/channels';
 import { notFound } from 'next/navigation';
 
 type Params = {
-	params: { channelId: string };
+	params: Promise<{ channelId: string }>;
 };
 
 export default async function ChannelPage({ params }: Params) {
