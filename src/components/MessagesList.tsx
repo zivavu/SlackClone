@@ -35,10 +35,12 @@ export function MessagesList({
 	}
 
 	return (
-		<section className="flex-1 overflow-y-auto px-3 sm:px-4 py-4">
+		<section className="flex-1 overflow-y-auto py-4">
 			<ol className="space-y-4">
 				{messages.map((message) => (
-					<li key={message.id} className="flex items-start gap-3 group">
+					<li
+						key={message.id}
+						className="flex items-center gap-3 group hover:bg-white/5 px-3 sm:px-4 py-1">
 						<div className="size-9 shrink-0 rounded bg-white/10 grid place-items-center text-xs font-medium">
 							{message.initials}
 						</div>
@@ -83,14 +85,14 @@ export function MessagesList({
 										type="button"
 										title="Edit"
 										onClick={() => startEdit(message.id, message.content)}
-										className="p-1 rounded text-[12px]">
+										className="p-1 rounded text-[12px] hover:bg-white/30">
 										<Pencil className="size-4" aria-hidden />
 									</button>
 									<button
 										type="button"
 										title="Delete"
 										onClick={() => onDelete?.(message.id)}
-										className="p-1 rounded">
+										className="p-1 rounded hover:bg-white/30">
 										<Trash2 className="size-4" aria-hidden />
 									</button>
 								</div>
