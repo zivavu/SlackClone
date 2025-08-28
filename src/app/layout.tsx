@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist_Mono, Lato } from 'next/font/google';
 import './globals.css';
+import ReactQueryProvider from './ReactQueryProvider';
 
 const lato = Lato({
 	variable: '--font-geist-sans',
@@ -28,7 +29,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${lato.variable} ${geistMono.variable} antialiased`}>
-				{children}
+				<ReactQueryProvider>{children}</ReactQueryProvider>
 			</body>
 		</html>
 	);

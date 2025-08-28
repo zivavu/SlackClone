@@ -6,9 +6,33 @@ import { ChannelsSidebar } from '@/components/ChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
-import { useEffect, useOptimistic, useState, useTransition } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 type DirectMessage = { name: string; status: 'online' | 'away' | 'offline' };
+
+async function fetchMessages(channelId: string): Promise<Message[]> {
+	const res = await fetch(`/api/channels/${channelId}/messages`, {
+		cache: 'no-store',
+	});
+	if (!res.ok) throw new Error('Failed to load');
+	const data = (await res.json()) as Array<{
+		id: string;
+		author: string;
+		initials: string;
+		timestamp: string; // ISO
+		content: string;
+	}>;
+	return data.map((d) => ({
+		id: d.id,
+		author: d.author,
+		initials: d.initials,
+		timestamp: new Date(d.timestamp).toLocaleTimeString('en-US', {
+			hour: 'numeric',
+			minute: '2-digit',
+		}),
+		content: d.content,
+	}));
+}
 
 export default function ClientView({
 	channelId,
@@ -25,90 +49,73 @@ export default function ClientView({
 	directMessages: DirectMessage[];
 	initialMessages: Message[];
 }) {
-	const [baseMessages, setBaseMessages] = useState<Message[]>(initialMessages);
-	const [messages, applyOptimistic] = useOptimistic(
-		baseMessages,
-		(
-			state: Message[],
-			action: { type: 'add'; message: Message } | { type: 'remove'; id: string }
-		) => {
-			if (action.type === 'add') return [...state, action.message];
-			if (action.type === 'remove')
-				return state.filter((m) => m.id !== action.id);
-			return state;
-		}
-	);
-	const [, startTransition] = useTransition();
+	const queryClient = useQueryClient();
+	const queryKey = ['messages', channelId];
 
-	useEffect(() => {
-		let cancelled = false;
-		(async () => {
-			try {
-				const res = await fetch(`/api/channels/${channelId}/messages`, {
-					cache: 'no-store',
-				});
-				if (!res.ok) return;
-				const data = (await res.json()) as Array<{
-					id: string;
-					author: string;
-					initials: string;
-					timestamp: string;
-					content: string;
-				}>;
-				if (cancelled) return;
-				setBaseMessages(
-					data.map((d) => ({
-						id: d.id,
-						author: d.author,
-						initials: d.initials,
-						timestamp: new Date(d.timestamp).toLocaleTimeString('en-US', {
-							hour: 'numeric',
-							minute: '2-digit',
-						}),
-						content: d.content,
-					}))
-				);
-			} catch {}
-		})();
-		return () => {
-			cancelled = true;
-		};
-	}, [channelId]);
+	const { data: messages = initialMessages } = useQuery({
+		queryKey,
+		queryFn: () => fetchMessages(channelId),
+		initialData: initialMessages,
+		staleTime: 5_000,
+	});
 
-	async function onSend(content: string) {
-		const tempId = `temp-${Date.now()}`;
-		startTransition(() =>
-			applyOptimistic({
-				type: 'add',
-				message: {
-					id: tempId,
-					author: 'You',
-					initials: 'Y',
-					timestamp: new Date().toLocaleTimeString('en-US', {
-						hour: 'numeric',
-						minute: '2-digit',
-					}),
-					content,
-				},
-			})
-		);
-		try {
+	const sendMutation = useMutation({
+		mutationFn: async (content: string) => {
 			const res = await fetch('/api/messages', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ channelId, content, author: 'You' }),
 			});
 			if (!res.ok) throw new Error('Failed to send');
-		} catch {}
-	}
+			return (await res.json()) as { id: string };
+		},
+		onMutate: async (content: string) => {
+			await queryClient.cancelQueries({ queryKey });
+			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
+			const optimistic: Message = {
+				id: `temp-${Date.now()}`,
+				author: 'You',
+				initials: 'Y',
+				timestamp: new Date().toLocaleTimeString('en-US', {
+					hour: 'numeric',
+					minute: '2-digit',
+				}),
+				content,
+			};
+			queryClient.setQueryData<Message[]>(queryKey, [...previous, optimistic]);
+			return { previous };
+		},
+		onError: (_err, _vars, context) => {
+			if (context?.previous)
+				queryClient.setQueryData(queryKey, context.previous);
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({ queryKey });
+		},
+	});
 
-	async function onDelete(id: string) {
-		startTransition(() => applyOptimistic({ type: 'remove', id }));
-		try {
+	const deleteMutation = useMutation({
+		mutationFn: async (id: string) => {
 			const res = await fetch(`/api/messages/${id}`, { method: 'DELETE' });
 			if (!res.ok) throw new Error('Failed to delete');
-		} catch {}
-	}
+		},
+		onMutate: async (id: string) => {
+			await queryClient.cancelQueries({ queryKey });
+			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
+			queryClient.setQueryData<Message[]>(
+				queryKey,
+				previous.filter((m) => m.id !== id)
+			);
+			return { previous };
+		},
+		onError: (_err, _vars, context) => {
+			if (context?.previous)
+				queryClient.setQueryData(queryKey, context.previous);
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({ queryKey });
+		},
+	});
 
 	return (
 		<div className="h-svh flex flex-col bg-gradient-to-b from-[#330d38] to-[#230525] text-foreground">
@@ -121,9 +128,12 @@ export default function ClientView({
 				/>
 				<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21]">
 					<ChannelHeader name={channelName} topic={channelTopic} />
-					<MessagesList messages={messages} onDelete={onDelete} />
+					<MessagesList
+						messages={messages}
+						onDelete={(id) => deleteMutation.mutate(id)}
+					/>
 					<Composer
-						onSend={onSend}
+						onSend={(content) => sendMutation.mutate(content)}
 						channelId={channelId}
 						placeholder={`Message #${channelName}`}
 					/>
