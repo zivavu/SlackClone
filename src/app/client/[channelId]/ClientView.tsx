@@ -63,7 +63,6 @@ export default function ClientView({
 		mutationFn: async (content: string) => {
 			const res = await fetch('/api/messages', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ channelId, content, author: 'You' }),
 			});
 			if (!res.ok) throw new Error('Failed to send');
@@ -117,6 +116,32 @@ export default function ClientView({
 		},
 	});
 
+	const editMutation = useMutation({
+		mutationFn: async ({ id, content }: { id: string; content: string }) => {
+			const res = await fetch(`/api/messages/${id}`, {
+				method: 'PATCH',
+				body: JSON.stringify({ content }),
+			});
+			if (!res.ok) throw new Error('Failed to edit');
+		},
+		onMutate: async ({ id, content }) => {
+			await queryClient.cancelQueries({ queryKey });
+			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
+			queryClient.setQueryData<Message[]>(
+				queryKey,
+				previous.map((m) => (m.id === id ? { ...m, content } : m))
+			);
+			return { previous };
+		},
+		onError: (_err, _vars, context) => {
+			if (context?.previous)
+				queryClient.setQueryData(queryKey, context.previous);
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({ queryKey });
+		},
+	});
+
 	return (
 		<div className="h-svh flex flex-col bg-gradient-to-b from-[#330d38] to-[#230525] text-foreground">
 			<GlobalTopBar />
@@ -131,6 +156,7 @@ export default function ClientView({
 					<MessagesList
 						messages={messages}
 						onDelete={(id) => deleteMutation.mutate(id)}
+						onEdit={(id, content) => editMutation.mutate({ id, content })}
 					/>
 					<Composer
 						onSend={(content) => sendMutation.mutate(content)}
