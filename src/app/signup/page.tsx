@@ -26,7 +26,7 @@ export default function SignUpPage() {
 				onSuccess: () => router.push('/client'),
 			}
 		);
-		if (error) setError(error.message);
+		if (error) setError(error?.message ?? null);
 		setIsLoading(false);
 	}
 
@@ -74,8 +74,8 @@ export default function SignUpPage() {
 				</button>
 				<div className="text-sm text-white/70">
 					Already have an account?{' '}
-					<Link href="/signin" className="underline">
-						Sign in
+					<Link href="/login" className="underline">
+						Login
 					</Link>
 				</div>
 			</form>
