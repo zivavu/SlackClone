@@ -6,9 +6,9 @@ import { NextResponse } from 'next/server';
 
 export async function DELETE(
 	_request: Request,
-	{ params }: { params: { id: string } }
+	context: { params: Promise<{ id: string }> }
 ) {
-	const { id } = params;
+	const { id } = await context.params;
 	if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 	const db = await getDb();
 	await db.collection('messages').deleteOne({ _id: new ObjectId(id) });
@@ -17,9 +17,9 @@ export async function DELETE(
 
 export async function PATCH(
 	request: Request,
-	{ params }: { params: { id: string } }
+	context: { params: Promise<{ id: string }> }
 ) {
-	const { id } = params;
+	const { id } = await context.params;
 	if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 	const body = await request.json().catch(() => null);
 	if (!body || typeof body.content !== 'string') {

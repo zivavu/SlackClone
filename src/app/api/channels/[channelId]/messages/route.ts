@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
 	_req: Request,
-	{ params }: { params: { channelId: string } }
+	context: { params: Promise<{ channelId: string }> }
 ) {
-	const { channelId } = params;
+	const { channelId } = await context.params;
 	if (!channelId)
 		return NextResponse.json({ error: 'Missing channelId' }, { status: 400 });
 	const db = await getDb();

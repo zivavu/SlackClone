@@ -8,13 +8,11 @@ export function middleware(request: NextRequest) {
 		return NextResponse.next();
 	}
 
-	const hasAuthCookie = request.cookies
-		.getAll()
-		.some((c) => c.name.startsWith('better-auth'));
+	const sessionToken = request.cookies.get('better-auth.session_token');
 
-	if (!hasAuthCookie) {
+	if (!sessionToken) {
 		const url = request.nextUrl.clone();
-		url.pathname = '/login';
+		url.pathname = '/signin';
 		url.searchParams.set('redirect', pathname);
 		return NextResponse.redirect(url);
 	}
@@ -23,5 +21,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ['/client/:path*'],
+	matcher: ['/((?!api/auth|_next/static|_next/image|favicon.ico).*)'],
 };
