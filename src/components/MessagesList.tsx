@@ -1,4 +1,3 @@
-import { deleteMessage } from '@/app/client/[channelId]/actions';
 import { Trash2 } from 'lucide-react';
 
 export type Message = {
@@ -11,10 +10,10 @@ export type Message = {
 
 export function MessagesList({
 	messages,
-	channelId,
+	onDelete,
 }: {
 	messages: Message[];
-	channelId?: string;
+	onDelete?: (id: string) => void | Promise<void>;
 }) {
 	return (
 		<section className="flex-1 overflow-y-auto px-3 sm:px-4 py-4">
@@ -38,16 +37,13 @@ export function MessagesList({
 							</p>
 							<div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-0 -translate-y-2 ">
 								<div className="flex items-center gap-1 rounded-full bg-black/60 backdrop-blur px-1.5 py-1 border border-white/10 shadow hover:bg-white/5">
-									<form action={deleteMessage}>
-										<input type="hidden" name="channelId" value={channelId} />
-										<input type="hidden" name="messageId" value={message.id} />
-										<button
-											type="submit"
-											title="Delete"
-											className="p-1 rounded">
-											<Trash2 className="size-4" aria-hidden />
-										</button>
-									</form>
+									<button
+										type="button"
+										title="Delete"
+										onClick={() => onDelete?.(message.id)}
+										className="p-1 rounded">
+										<Trash2 className="size-4" aria-hidden />
+									</button>
 								</div>
 							</div>
 						</div>

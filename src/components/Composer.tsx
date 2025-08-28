@@ -5,20 +5,39 @@ import { useRef } from 'react';
 export function Composer({
 	placeholder = 'Message #general',
 	action,
+	onSend,
 	channelId,
 	author = 'You',
 }: {
 	placeholder?: string;
 	action?: (formData: FormData) => Promise<void>;
+	onSend?: (content: string) => void | Promise<void>;
 	channelId?: string;
 	author?: string;
 }) {
 	const formRef = useRef<HTMLFormElement | null>(null);
 
+	function submitViaOnSend() {
+		if (!onSend) return false;
+		const form = formRef.current;
+		if (!form) return false;
+		const data = new FormData(form);
+		const content = String(data.get('content') || '').trim();
+		if (!content) return true;
+		onSend(content);
+		const textarea = form.querySelector(
+			'#message'
+		) as HTMLTextAreaElement | null;
+		if (textarea) textarea.value = '';
+		return true;
+	}
+
 	function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
-			formRef.current?.requestSubmit();
+			if (!submitViaOnSend()) {
+				formRef.current?.requestSubmit();
+			}
 		}
 	}
 
@@ -135,9 +154,14 @@ export function Composer({
 							</svg>
 						</button>
 						<button
-							type="submit"
+							type={onSend ? 'button' : 'submit'}
 							className="inline-flex items-center gap-1 rounded bg-white text-black px-3 py-1.5 text-sm font-medium hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/20"
-							title="Send">
+							title="Send"
+							onClick={() => {
+								if (!submitViaOnSend()) {
+									formRef.current?.requestSubmit();
+								}
+							}}>
 							<svg
 								viewBox="0 0 24 24"
 								className="size-4"
