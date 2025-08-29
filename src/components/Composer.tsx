@@ -1,6 +1,5 @@
 'use client';
 
-import { authClient } from '@/lib/auth-client';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -9,11 +8,8 @@ export function Composer({
 	onSend,
 }: {
 	placeholder?: string;
-	onSend?: (content: string) => void | Promise<void>;
-	channelId?: string;
+	onSend?: (input: { content: string }) => void | Promise<void>;
 }) {
-	const { data } = authClient.useSession();
-
 	const formRef = useRef<HTMLFormElement | null>(null);
 
 	const { register, handleSubmit, reset } = useForm<{ content: string }>({
@@ -25,7 +21,7 @@ export function Composer({
 		handleSubmit(async ({ content }) => {
 			const trimmed = String(content || '').trim();
 			if (!trimmed) return;
-			await onSend(trimmed);
+			await onSend({ content: trimmed });
 			reset({ content: '' });
 		})();
 		return true;

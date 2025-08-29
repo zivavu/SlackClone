@@ -8,32 +8,9 @@ import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
 import { authClient } from '@/lib/auth-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchMessages } from './actions';
 
 type DirectMessage = { name: string; status: 'online' | 'away' | 'offline' };
-
-async function fetchMessages(channelId: string): Promise<Message[]> {
-	const res = await fetch(`/api/channels/${channelId}/messages`, {
-		cache: 'no-store',
-	});
-	if (!res.ok) throw new Error('Failed to load');
-	const data = (await res.json()) as Array<{
-		id: string;
-		author: string;
-		initials: string;
-		timestamp: string; // ISO
-		content: string;
-	}>;
-	return data.map((d) => ({
-		id: d.id,
-		author: d.author,
-		initials: d.initials,
-		timestamp: new Date(d.timestamp).toLocaleTimeString('en-US', {
-			hour: 'numeric',
-			minute: '2-digit',
-		}),
-		content: d.content,
-	}));
-}
 
 export default function ClientView({
 	channelId,
@@ -62,7 +39,7 @@ export default function ClientView({
 	});
 
 	const sendMutation = useMutation({
-		mutationFn: async (content: string) => {
+		mutationFn: async ({ content }: { content: string }) => {
 			const res = await fetch('/api/messages', {
 				method: 'POST',
 				body: JSON.stringify({
@@ -74,7 +51,7 @@ export default function ClientView({
 			if (!res.ok) throw new Error('Failed to send');
 			return (await res.json()) as { id: string };
 		},
-		onMutate: async (content: string) => {
+		onMutate: async ({ content }: { content: string }) => {
 			await queryClient.cancelQueries({ queryKey });
 			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
 			const optimistic: Message = {
@@ -169,8 +146,7 @@ export default function ClientView({
 						onEdit={(id, content) => editMutation.mutate({ id, content })}
 					/>
 					<Composer
-						onSend={(content) => sendMutation.mutate(content)}
-						channelId={channelId}
+						onSend={(input) => sendMutation.mutate(input)}
 						placeholder={`Message #${channelName}`}
 					/>
 				</main>
