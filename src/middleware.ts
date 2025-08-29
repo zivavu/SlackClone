@@ -1,20 +1,24 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+const protectedRoutes = ['/client'];
+const authRoutes = ['/signin', '/signup'];
+
 export function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	if (!pathname.startsWith('/client')) {
-		return NextResponse.next();
+	if (protectedRoutes.some((route) => pathname.startsWith(route))) {
+		const sessionToken = request.cookies.get('better-auth.session_token');
+		if (!sessionToken) {
+			return NextResponse.redirect(new URL('/signin', request.url));
+		}
 	}
 
-	const sessionToken = request.cookies.get('better-auth.session_token');
-
-	if (!sessionToken) {
-		const url = request.nextUrl.clone();
-		url.pathname = '/signin';
-		url.searchParams.set('redirect', pathname);
-		return NextResponse.redirect(url);
+	if (authRoutes.some((route) => pathname.startsWith(route))) {
+		const sessionToken = request.cookies.get('better-auth.session_token');
+		if (sessionToken) {
+			return NextResponse.redirect(new URL('/client', request.url));
+		}
 	}
 
 	return NextResponse.next();

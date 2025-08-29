@@ -3,13 +3,12 @@
 import GithubAuthButton from '@/components/GithubAuthButton';
 import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 type CallbackCtx = { error: { message: string } };
 
 export default function LoginPage() {
-	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
@@ -23,9 +22,8 @@ export default function LoginPage() {
 		setIsLoading(true);
 		setError(null);
 		const { error } = await authClient.signIn.email(
-			{ email, password, callbackURL: redirectTo },
+			{ email, password, callbackURL: redirectTo, rememberMe: true },
 			{
-				onSuccess: () => router.push(redirectTo),
 				onError: (ctx: CallbackCtx) => setError(ctx.error.message),
 			}
 		);
