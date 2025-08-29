@@ -1,34 +1,33 @@
 'use client';
 
+import { authClient } from '@/lib/auth-client';
 import { useRef } from 'react';
+import { useForm } from 'react-hook-form';
 
 export function Composer({
 	placeholder = 'Message #general',
-	action,
 	onSend,
-	channelId,
-	author = 'You',
 }: {
 	placeholder?: string;
-	action?: (formData: FormData) => Promise<void>;
 	onSend?: (content: string) => void | Promise<void>;
 	channelId?: string;
-	author?: string;
 }) {
+	const { data } = authClient.useSession();
+
 	const formRef = useRef<HTMLFormElement | null>(null);
+
+	const { register, handleSubmit, reset } = useForm<{ content: string }>({
+		defaultValues: { content: '' },
+	});
 
 	function submitViaOnSend() {
 		if (!onSend) return false;
-		const form = formRef.current;
-		if (!form) return false;
-		const data = new FormData(form);
-		const content = String(data.get('content') || '').trim();
-		if (!content) return true;
-		onSend(content);
-		const textarea = form.querySelector(
-			'#message'
-		) as HTMLTextAreaElement | null;
-		if (textarea) textarea.value = '';
+		handleSubmit(async ({ content }) => {
+			const trimmed = String(content || '').trim();
+			if (!trimmed) return;
+			await onSend(trimmed);
+			reset({ content: '' });
+		})();
 		return true;
 	}
 
@@ -45,20 +44,16 @@ export function Composer({
 		<footer className="border-t border-white/10 p-2 sm:p-3">
 			<form
 				ref={formRef}
-				action={action}
 				className="rounded-xl bg-[#222529] focus-within:ring-2 focus-within:ring-white/20">
-				<input type="hidden" name="channelId" value={channelId} />
-				<input type="hidden" name="author" value={author} />
 				<div className="px-2 sm:px-3 py-2">
 					<label className="sr-only" htmlFor="message">
 						Message
 					</label>
 					<textarea
 						id="message"
-						name="content"
 						placeholder={placeholder}
 						className="w-full resize-none bg-transparent outline-none placeholder:text-white/40 text-[15px]"
-						required
+						{...register('content', { required: true })}
 						onKeyDown={handleKeyDown}
 					/>
 				</div>

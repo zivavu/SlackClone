@@ -6,6 +6,7 @@ import { ChannelsSidebar } from '@/components/ChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
+import { authClient } from '@/lib/auth-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 type DirectMessage = { name: string; status: 'online' | 'away' | 'offline' };
@@ -51,6 +52,7 @@ export default function ClientView({
 }) {
 	const queryClient = useQueryClient();
 	const queryKey = ['messages', channelId];
+	const { data: session } = authClient.useSession();
 
 	const { data: messages = initialMessages } = useQuery({
 		queryKey,
@@ -63,7 +65,11 @@ export default function ClientView({
 		mutationFn: async (content: string) => {
 			const res = await fetch('/api/messages', {
 				method: 'POST',
-				body: JSON.stringify({ channelId, content, author: 'You' }),
+				body: JSON.stringify({
+					channelId,
+					content,
+					author: session?.user.name,
+				}),
 			});
 			if (!res.ok) throw new Error('Failed to send');
 			return (await res.json()) as { id: string };
@@ -73,8 +79,12 @@ export default function ClientView({
 			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
 			const optimistic: Message = {
 				id: `temp-${Date.now()}`,
-				author: 'You',
-				initials: 'Y',
+				author: session?.user.name ?? 'Unknown',
+				initials:
+					session?.user.name
+						?.split(' ')
+						.map((n) => n[0])
+						.join('') ?? 'U',
 				timestamp: new Date().toLocaleTimeString('en-US', {
 					hour: 'numeric',
 					minute: '2-digit',
