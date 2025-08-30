@@ -22,7 +22,7 @@ export default async function ChannelPage({ params }: Params) {
 	const channel = channels.find((c) => c.id === channelId);
 	if (!channel) return notFound();
 
-	const channelLinks = channels.map((c) => ({ id: c.id, name: c.name }));
+	const channelLinks = channels;
 	const directMessages = await getDirectMessages();
 
 	const db = await getDb();
@@ -41,9 +41,7 @@ export default async function ChannelPage({ params }: Params) {
 
 	return (
 		<ClientView
-			channelId={channel.id}
-			channelName={channel.name}
-			channelTopic={channel.topic}
+			channel={channel}
 			channelLinks={channelLinks}
 			directMessages={directMessages}
 			initialMessages={initialMessages}

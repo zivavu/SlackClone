@@ -33,7 +33,6 @@ export function MessagesList({
 		setEditingId(null);
 	}
 
-	console.log(messages);
 	return (
 		<section className="flex-1 overflow-y-auto py-4">
 			<ol className="space-y-4">
@@ -51,7 +50,7 @@ export function MessagesList({
 									{message.author}
 								</p>
 								<span className="text-[11px] text-white/50">
-									{new Date(message.timestamp).toLocaleTimeString('en-PL', {
+									{new Date(message.timestamp).toLocaleTimeString('en-US', {
 										hour: 'numeric',
 										minute: '2-digit',
 									})}

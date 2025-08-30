@@ -3,11 +3,12 @@
 import { getDb } from '@/lib/mongodb';
 
 export type DirectMessageUser = {
+	id: string;
 	name: string;
 	status: 'online' | 'away' | 'offline';
 };
 
-type UserRow = { id: string; name?: string };
+type UserRow = { _id: string; name?: string };
 type PresenceRow = {
 	userId: string;
 	status?: 'online' | 'away' | 'offline';
@@ -20,12 +21,10 @@ export async function getDirectMessages(): Promise<DirectMessageUser[]> {
 	const presenceCol = db.collection('presence');
 
 	const [users, presenceDocs] = await Promise.all([
-		usersCol
-			.aggregate<UserRow>([{ $project: { _id: 0, id: 1, name: 1 } }])
-			.toArray(),
+		usersCol.aggregate<UserRow>([{ $project: { id: 1, name: 1 } }]).toArray(),
 		presenceCol
 			.aggregate<PresenceRow>([
-				{ $project: { _id: 0, userId: 1, status: 1, lastSeenAt: 1 } },
+				{ $project: { userId: 1, status: 1, lastSeenAt: 1 } },
 			])
 			.toArray(),
 	]);
@@ -47,9 +46,10 @@ export async function getDirectMessages(): Promise<DirectMessageUser[]> {
 	return users
 		.filter((user) => user.name)
 		.map((user) => ({
+			id: user._id.toString(),
 			name: user.name!,
 			status:
-				(userIdToPresence.get(user.id) as DirectMessageUser['status']) ||
+				(userIdToPresence.get(user._id) as DirectMessageUser['status']) ||
 				'offline',
 		}))
 		.sort((a, b) => a.name.localeCompare(b.name));

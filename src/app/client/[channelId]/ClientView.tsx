@@ -1,35 +1,29 @@
 'use client';
 
+import { DirectMessageUser } from '@/app/api/direct-messages/actions';
 import { AppNavSidebar } from '@/components/AppNavSidebar';
 import { ChannelHeader } from '@/components/ChannelHeader';
 import { ChannelsSidebar } from '@/components/ChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
+import { Channel } from '@/data/channels';
 import { authClient } from '@/lib/auth-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-export type DirectMessage = {
-	name: string;
-	status: 'online' | 'away' | 'offline';
-};
-
 export default function ClientView({
-	channelId,
-	channelName,
-	channelTopic,
+	channel,
 	channelLinks,
 	directMessages,
 	initialMessages,
 }: {
-	channelId: string;
-	channelName: string;
-	channelTopic?: string;
+	channel: Channel;
 	channelLinks: { id: string; name: string }[];
-	directMessages: DirectMessage[];
+	directMessages: DirectMessageUser[];
 	initialMessages: Message[];
 }) {
+	const { id: channelId, name: channelName, topic: channelTopic } = channel;
 	const queryClient = useQueryClient();
 	const queryKey = ['messages', channelId];
 	const { data: session } = authClient.useSession();
@@ -62,7 +56,7 @@ export default function ClientView({
 		queryFn: async () => {
 			const res = await fetch('/api/direct-messages');
 			if (!res.ok) throw new Error('Failed to load DMs');
-			return (await res.json()) as DirectMessage[];
+			return (await res.json()) as DirectMessageUser[];
 		},
 		initialData: directMessages,
 		refetchInterval: 20000,

@@ -24,9 +24,7 @@ export default function SignUpPage() {
 		setError(null);
 		const { error } = await authClient.signUp.email(
 			{ email, password, name, callbackURL: redirectTo },
-			{
-				onError: (ctx: CallbackCtx) => setError(ctx.error.message),
-			}
+			{ onError: (ctx: CallbackCtx) => setError(ctx.error.message) }
 		);
 		if (error) setError(error?.message ?? null);
 		setIsLoading(false);
