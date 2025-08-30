@@ -1,6 +1,5 @@
 'use client';
 
-import { fetchMessages } from '@/app/api/client/messages';
 import { AppNavSidebar } from '@/components/AppNavSidebar';
 import { ChannelHeader } from '@/components/ChannelHeader';
 import { ChannelsSidebar } from '@/components/ChannelsSidebar';
@@ -55,17 +54,10 @@ export default function ClientView({
 		};
 	}, [session]);
 
-	const { data: messages = initialMessages } = useQuery({
-		queryKey,
-		queryFn: () => fetchMessages(channelId),
-		initialData: initialMessages,
-		staleTime: 5000,
-	});
-
 	const { data: dmList = directMessages } = useQuery({
 		queryKey: ['direct-messages'],
 		queryFn: async () => {
-			const res = await fetch('/api/direct-messages', { cache: 'no-store' });
+			const res = await fetch('/api/direct-messages');
 			if (!res.ok) throw new Error('Failed to load DMs');
 			return (await res.json()) as DirectMessage[];
 		},
@@ -174,7 +166,7 @@ export default function ClientView({
 				<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21]">
 					<ChannelHeader name={channelName} topic={channelTopic} />
 					<MessagesList
-						messages={messages}
+						messages={[]}
 						onDelete={(id) => deleteMutation.mutate(id)}
 						onEdit={(id, content) => editMutation.mutate({ id, content })}
 					/>

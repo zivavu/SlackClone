@@ -1,3 +1,4 @@
+import { getDirectMessages } from '@/app/api/direct-messages/actions';
 import { type Message } from '@/components/MessagesList';
 import { channels } from '@/data/channels';
 import { getDb } from '@/lib/mongodb';
@@ -23,22 +24,7 @@ export default async function ChannelPage({ params }: Params) {
 	if (!channel) return notFound();
 
 	const channelLinks = channels.map((c) => ({ id: c.id, name: c.name }));
-	let directMessages: {
-		name: string;
-		status: 'online' | 'away' | 'offline';
-	}[] = [];
-	try {
-		const res = await fetch(
-			`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/direct-messages`,
-			{
-				next: { revalidate: 0 },
-				cache: 'no-store',
-			}
-		);
-		if (res.ok) {
-			directMessages = (await res.json()) as typeof directMessages;
-		}
-	} catch {}
+	const directMessages = await getDirectMessages();
 
 	const db = await getDb();
 	const docs = (await db

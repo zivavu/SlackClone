@@ -5,21 +5,23 @@ import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 type CallbackCtx = { error: { message: string } };
+type FormValues = { name: string; email: string; password: string };
 
 export default function SignUpPage() {
 	const searchParams = useSearchParams();
-	const [name, setName] = useState('');
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	const { register, handleSubmit } = useForm<FormValues>({
+		defaultValues: { name: '', email: '', password: '' },
+	});
+
 	const redirectTo = searchParams.get('redirect') || '/client';
 
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
+	async function onSubmit({ name, email, password }: FormValues) {
 		setIsLoading(true);
 		setError(null);
 		const { error } = await authClient.signUp.email(
@@ -35,15 +37,13 @@ export default function SignUpPage() {
 	return (
 		<main className="min-h-svh grid place-items-center bg-[#121317] text-foreground px-4">
 			<form
-				onSubmit={handleSubmit}
+				onSubmit={handleSubmit(onSubmit)}
 				className="w-full max-w-sm space-y-4 bg-white/5 rounded-xl p-6 border border-white/10">
 				<h1 className="text-lg font-semibold">Sign up</h1>
 				<label className="block">
 					<span className="text-sm text-white/70">Name</span>
 					<input
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						required
+						{...register('name', { required: true })}
 						className="mt-1 w-full rounded bg-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-white/20"
 					/>
 				</label>
@@ -51,9 +51,7 @@ export default function SignUpPage() {
 					<span className="text-sm text-white/70">Email</span>
 					<input
 						type="email"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						required
+						{...register('email', { required: true })}
 						className="mt-1 w-full rounded bg-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-white/20"
 					/>
 				</label>
@@ -61,9 +59,7 @@ export default function SignUpPage() {
 					<span className="text-sm text-white/70">Password</span>
 					<input
 						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
+						{...register('password', { required: true })}
 						className="mt-1 w-full rounded bg-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-white/20"
 					/>
 				</label>

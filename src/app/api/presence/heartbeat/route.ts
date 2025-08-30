@@ -9,14 +9,12 @@ export async function POST(request: Request) {
 	if (!body || typeof body.userId !== 'string') {
 		return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
 	}
-	const now = new Date();
 	await db
 		.collection('presence')
 		.updateOne(
 			{ userId: body.userId },
-			{ $set: { userId: body.userId, status: 'online', lastSeenAt: now } },
+			{ $set: { userId: body.userId, lastSeenAt: new Date() } },
 			{ upsert: true }
 		);
 	return NextResponse.json({ ok: true });
 }
-
