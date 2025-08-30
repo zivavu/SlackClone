@@ -18,14 +18,6 @@ export async function GET(
 		docs.map((d) => ({
 			id: String(d._id),
 			author: d.author ?? 'Unknown',
-			initials:
-				typeof d.initials === 'string' && d.initials.length > 0
-					? d.initials
-					: String(d.author ?? 'U')
-							.split(' ')
-							.map((n: string) => n[0])
-							.slice(0, 2)
-							.join(''),
 			timestamp: new Date(d.createdAt ?? Date.now()).toISOString(),
 			content: d.content ?? '',
 		}))

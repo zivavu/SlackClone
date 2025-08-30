@@ -15,9 +15,7 @@ export default function LoginPage() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const { register, handleSubmit } = useForm<FormValues>({
-		defaultValues: { email: '', password: '' },
-	});
+	const { register, handleSubmit } = useForm<FormValues>();
 
 	const redirectTo = searchParams.get('redirect') || '/client';
 

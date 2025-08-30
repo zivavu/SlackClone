@@ -10,7 +10,10 @@ import { authClient } from '@/lib/auth-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-type DirectMessage = { name: string; status: 'online' | 'away' | 'offline' };
+export type DirectMessage = {
+	name: string;
+	status: 'online' | 'away' | 'offline';
+};
 
 export default function ClientView({
 	channelId,
@@ -66,6 +69,18 @@ export default function ClientView({
 		staleTime: 5000,
 	});
 
+	const { data: messages = initialMessages } = useQuery({
+		queryKey,
+		queryFn: async () => {
+			const res = await fetch(`/api/channels/${channelId}/messages`);
+			if (!res.ok) throw new Error('Failed to load messages');
+			return (await res.json()) as Message[];
+		},
+		initialData: initialMessages,
+		refetchInterval: 20000,
+		staleTime: 5000,
+	});
+
 	const sendMutation = useMutation({
 		mutationFn: async ({ content }: { content: string }) => {
 			const res = await fetch('/api/messages', {
@@ -85,15 +100,7 @@ export default function ClientView({
 			const optimistic: Message = {
 				id: `temp-${Date.now()}`,
 				author: session?.user.name ?? 'Unknown',
-				initials:
-					session?.user.name
-						?.split(' ')
-						.map((n) => n[0])
-						.join('') ?? 'U',
-				timestamp: new Date().toLocaleTimeString('en-US', {
-					hour: 'numeric',
-					minute: '2-digit',
-				}),
+				timestamp: new Date().toISOString(),
 				content,
 			};
 			queryClient.setQueryData<Message[]>(queryKey, [...previous, optimistic]);
@@ -166,7 +173,7 @@ export default function ClientView({
 				<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21]">
 					<ChannelHeader name={channelName} topic={channelTopic} />
 					<MessagesList
-						messages={[]}
+						messages={messages}
 						onDelete={(id) => deleteMutation.mutate(id)}
 						onEdit={(id, content) => editMutation.mutate({ id, content })}
 					/>

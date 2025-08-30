@@ -6,7 +6,6 @@ import { useState } from 'react';
 export type Message = {
 	id: string;
 	author: string;
-	initials: string;
 	timestamp: string;
 	content: string;
 };
@@ -34,6 +33,7 @@ export function MessagesList({
 		setEditingId(null);
 	}
 
+	console.log(messages);
 	return (
 		<section className="flex-1 overflow-y-auto py-4">
 			<ol className="space-y-4">
@@ -42,7 +42,8 @@ export function MessagesList({
 						key={message.id}
 						className="flex items-center gap-3 group hover:bg-white/5 px-3 sm:px-4 py-1">
 						<div className="size-9 shrink-0 rounded bg-white/10 grid place-items-center text-xs font-medium">
-							{message.initials}
+							{message.author.split(' ')[0][0]}
+							{message.author.split(' ')[1]?.[0]}
 						</div>
 						<div className="min-w-0 flex-1 relative">
 							<div className="flex items-baseline gap-2">
@@ -50,7 +51,10 @@ export function MessagesList({
 									{message.author}
 								</p>
 								<span className="text-[11px] text-white/50">
-									{message.timestamp}
+									{new Date(message.timestamp).toLocaleTimeString('en-PL', {
+										hour: 'numeric',
+										minute: '2-digit',
+									})}
 								</span>
 							</div>
 							{editingId === message.id ? (

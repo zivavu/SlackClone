@@ -12,9 +12,8 @@ type Params = {
 
 type MessageRow = {
 	_id: ObjectId;
-	author?: string;
-	initials?: string;
-	createdAt?: Date | string | number;
+	author: string;
+	createdAt?: Date;
 	content?: string;
 };
 
@@ -35,19 +34,8 @@ export default async function ChannelPage({ params }: Params) {
 
 	const initialMessages: Message[] = docs.map((d) => ({
 		id: String(d._id),
-		author: d.author ?? 'Unknown',
-		initials:
-			d.initials && d.initials.length > 0
-				? d.initials
-				: String(d.author ?? 'U')
-						.split(' ')
-						.map((n: string) => n[0])
-						.slice(0, 2)
-						.join(''),
-		timestamp: new Date(d.createdAt ?? Date.now()).toLocaleTimeString('en-US', {
-			hour: 'numeric',
-			minute: '2-digit',
-		}),
+		author: d.author,
+		timestamp: d.createdAt?.toISOString() ?? '',
 		content: d.content ?? '',
 	}));
 

@@ -1,8 +1,9 @@
+import { DirectMessage } from '@/app/client/[channelId]/ClientView';
 import Link from 'next/link';
 
 type Props = {
 	channels: { id: string; name: string }[];
-	directMessages: { name: string; status: 'online' | 'away' | 'offline' }[];
+	directMessages: DirectMessage[];
 };
 
 export function ChannelsSidebar({ channels, directMessages }: Props) {
