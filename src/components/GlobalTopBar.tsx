@@ -2,6 +2,7 @@
 
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
+import ThemeToggle from './ThemeToggle';
 
 export function GlobalTopBar() {
 	const router = useRouter();
@@ -57,6 +58,7 @@ export function GlobalTopBar() {
 
 				{/* Right cluster */}
 				<div className="flex items-center gap-1.5">
+					<ThemeToggle />
 					<button
 						className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
 						title="Help">

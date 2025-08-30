@@ -27,7 +27,14 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
+			<head>
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `(() => { try { const k = 'theme'; const s = localStorage.getItem(k); const m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; const t = s || (m ? 'dark' : 'light'); if (t === 'dark') document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark'); } catch(_) {} })();`,
+					}}
+				/>
+			</head>
 			<body className={`${lato.variable} ${geistMono.variable} antialiased`}>
 				<ReactQueryProvider>{children}</ReactQueryProvider>
 			</body>
