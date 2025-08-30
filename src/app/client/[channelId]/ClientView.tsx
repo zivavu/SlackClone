@@ -1,5 +1,6 @@
 'use client';
 
+import { fetchMessages } from '@/app/api/client/messages';
 import { AppNavSidebar } from '@/components/AppNavSidebar';
 import { ChannelHeader } from '@/components/ChannelHeader';
 import { ChannelsSidebar } from '@/components/ChannelsSidebar';
@@ -8,7 +9,7 @@ import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
 import { authClient } from '@/lib/auth-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchMessages } from './actions';
+import { useEffect } from 'react';
 
 type DirectMessage = { name: string; status: 'online' | 'away' | 'offline' };
 
@@ -31,11 +32,46 @@ export default function ClientView({
 	const queryKey = ['messages', channelId];
 	const { data: session } = authClient.useSession();
 
+	useEffect(() => {
+		let interval: ReturnType<typeof setInterval> | null = null;
+		const user = session?.user as
+			| { id?: string; email?: string; name?: string }
+			| undefined;
+		const userId = user?.id || user?.email || user?.name;
+		if (!userId) return;
+		const beat = async () => {
+			try {
+				await fetch('/api/presence/heartbeat', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ userId }),
+				});
+			} catch {}
+		};
+		beat();
+		interval = setInterval(beat, 20000);
+		return () => {
+			if (interval) clearInterval(interval);
+		};
+	}, [session]);
+
 	const { data: messages = initialMessages } = useQuery({
 		queryKey,
 		queryFn: () => fetchMessages(channelId),
 		initialData: initialMessages,
-		staleTime: 5_000,
+		staleTime: 5000,
+	});
+
+	const { data: dmList = directMessages } = useQuery({
+		queryKey: ['direct-messages'],
+		queryFn: async () => {
+			const res = await fetch('/api/direct-messages', { cache: 'no-store' });
+			if (!res.ok) throw new Error('Failed to load DMs');
+			return (await res.json()) as DirectMessage[];
+		},
+		initialData: directMessages,
+		refetchInterval: 20000,
+		staleTime: 5000,
 	});
 
 	const sendMutation = useMutation({
@@ -134,10 +170,7 @@ export default function ClientView({
 			<GlobalTopBar />
 			<div className="flex-1 flex min-h-0 bg-transparent/0">
 				<AppNavSidebar />
-				<ChannelsSidebar
-					channels={channelLinks}
-					directMessages={directMessages}
-				/>
+				<ChannelsSidebar channels={channelLinks} directMessages={dmList} />
 				<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21]">
 					<ChannelHeader name={channelName} topic={channelTopic} />
 					<MessagesList

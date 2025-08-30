@@ -1,3 +1,5 @@
+'use server';
+
 import { getDb } from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
 

@@ -23,12 +23,22 @@ export default async function ChannelPage({ params }: Params) {
 	if (!channel) return notFound();
 
 	const channelLinks = channels.map((c) => ({ id: c.id, name: c.name }));
-	const directMessages = [
-		{ name: 'Ada Lovelace', status: 'online' as const },
-		{ name: 'Linus Torvalds', status: 'away' as const },
-		{ name: 'Grace Hopper', status: 'online' as const },
-		{ name: 'Margaret Hamilton', status: 'offline' as const },
-	];
+	let directMessages: {
+		name: string;
+		status: 'online' | 'away' | 'offline';
+	}[] = [];
+	try {
+		const res = await fetch(
+			`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/direct-messages`,
+			{
+				next: { revalidate: 0 },
+				cache: 'no-store',
+			}
+		);
+		if (res.ok) {
+			directMessages = (await res.json()) as typeof directMessages;
+		}
+	} catch {}
 
 	const db = await getDb();
 	const docs = (await db
