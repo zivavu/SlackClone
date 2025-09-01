@@ -82,7 +82,8 @@ export default function ClientView({
 				body: JSON.stringify({
 					channelId,
 					content,
-					author: session?.user.name,
+					authorName: session?.user.name,
+					authorId: session?.user.id,
 				}),
 			});
 			if (!res.ok) throw new Error('Failed to send');
@@ -92,9 +93,10 @@ export default function ClientView({
 			await queryClient.cancelQueries({ queryKey });
 			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
 			const optimistic: Message = {
-				id: `temp-${Date.now()}`,
-				author: session?.user.name ?? 'Unknown',
-				timestamp: new Date().toISOString(),
+				_id: `temp-${Date.now()}`,
+				authorName: session?.user.name ?? 'Unknown',
+				authorId: session?.user.id ?? 'Unknown',
+				createdAt: new Date().toISOString(),
 				content,
 			};
 			queryClient.setQueryData<Message[]>(queryKey, [...previous, optimistic]);
@@ -119,7 +121,7 @@ export default function ClientView({
 			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
 			queryClient.setQueryData<Message[]>(
 				queryKey,
-				previous.filter((m) => m.id !== id)
+				previous.filter((m) => m._id !== id)
 			);
 			return { previous };
 		},
@@ -145,7 +147,7 @@ export default function ClientView({
 			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
 			queryClient.setQueryData<Message[]>(
 				queryKey,
-				previous.map((m) => (m.id === id ? { ...m, content } : m))
+				previous.map((m) => (m._id === id ? { ...m, content } : m))
 			);
 			return { previous };
 		},

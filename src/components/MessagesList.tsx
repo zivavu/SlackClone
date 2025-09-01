@@ -1,12 +1,15 @@
 'use client';
 
+import { authClient } from '@/lib/auth-client';
 import { Pencil, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export type Message = {
-	id: string;
-	author: string;
-	timestamp: string;
+	_id: string;
+	authorName: string;
+	authorId: string;
+	createdAt: string;
+	updatedAt?: string;
 	content: string;
 };
 
@@ -19,8 +22,10 @@ export function MessagesList({
 	onDelete?: (id: string) => void | Promise<void>;
 	onEdit?: (id: string, content: string) => void | Promise<void>;
 }) {
+	const { data: session } = authClient.useSession();
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [draft, setDraft] = useState<string>('');
+	const containerRef = useRef<HTMLElement | null>(null);
 
 	function startEdit(id: string, content: string) {
 		setEditingId(id);
@@ -33,30 +38,43 @@ export function MessagesList({
 		setEditingId(null);
 	}
 
+	useEffect(() => {
+		if (
+			messages[0] &&
+			messages[messages.length - 1].authorId !== session?.user.id
+		) {
+			return;
+		}
+		const el = containerRef.current;
+		if (!el) return;
+		el.scrollTop = el.scrollHeight;
+	}, [messages]);
+
+	console.log(messages);
 	return (
-		<section className="flex-1 overflow-y-auto py-4">
+		<section ref={containerRef} className="flex-1 overflow-y-auto py-4">
 			<ol className="space-y-4">
 				{messages.map((message) => (
 					<li
-						key={message.id}
+						key={message._id}
 						className="flex items-center gap-3 group hover:bg-white/5 px-3 sm:px-4 py-1">
 						<div className="size-9 shrink-0 rounded bg-white/10 grid place-items-center text-xs font-medium">
-							{message.author.split(' ')[0][0]}
-							{message.author.split(' ')[1]?.[0]}
+							{message?.authorName?.split(' ')[0]?.[0]}
+							{message?.authorName?.split(' ')[1]?.[0]}
 						</div>
 						<div className="min-w-0 flex-1 relative">
 							<div className="flex items-baseline gap-2">
 								<p className="text-sm font-semibold leading-none">
-									{message.author}
+									{message.authorName}
 								</p>
 								<span className="text-[11px] text-white/50">
-									{new Date(message.timestamp).toLocaleTimeString('en-US', {
+									{new Date(message.createdAt).toLocaleTimeString('en-US', {
 										hour: 'numeric',
 										minute: '2-digit',
 									})}
 								</span>
 							</div>
-							{editingId === message.id ? (
+							{editingId === message._id ? (
 								<div className="mt-1">
 									<textarea
 										className="w-full rounded bg-white/5 px-2 py-1 text-[15px] outline-none focus:ring-2 focus:ring-white/20"
@@ -66,7 +84,7 @@ export function MessagesList({
 									/>
 									<div className="mt-1 flex items-center gap-2">
 										<button
-											onClick={() => saveEdit(message.id)}
+											onClick={() => saveEdit(message._id)}
 											className="px-2 py-1 rounded bg-white text-black text-sm">
 											Save
 										</button>
@@ -87,14 +105,14 @@ export function MessagesList({
 									<button
 										type="button"
 										title="Edit"
-										onClick={() => startEdit(message.id, message.content)}
+										onClick={() => startEdit(message._id, message.content)}
 										className="p-1 rounded text-[12px] hover:bg-white/30">
 										<Pencil className="size-4" aria-hidden />
 									</button>
 									<button
 										type="button"
 										title="Delete"
-										onClick={() => onDelete?.(message.id)}
+										onClick={() => onDelete?.(message._id)}
 										className="p-1 rounded hover:bg-white/30">
 										<Trash2 className="size-4" aria-hidden />
 									</button>

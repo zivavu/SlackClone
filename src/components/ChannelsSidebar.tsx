@@ -85,7 +85,6 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 					<ul className="mt-1">
 						{directMessages.map((dm) => {
 							const channnelId = [session?.user.id, dm.id].sort().join('_');
-							console.log(dm);
 							return (
 								<li key={dm.name}>
 									<Link

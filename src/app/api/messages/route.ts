@@ -12,18 +12,13 @@ export async function POST(request: Request) {
 	) {
 		return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
 	}
-	const author: string = typeof body.author === 'string' ? body.author : 'You';
 
 	const db = await getDb();
 	const result = await db.collection('messages').insertOne({
 		channelId: body.channelId,
 		content: body.content,
-		author,
-		initials: author
-			.split(' ')
-			.map((s) => s[0])
-			.slice(0, 2)
-			.join(''),
+		authorName: body.authorName,
+		authorId: body.authorId,
 		createdAt: new Date(),
 	});
 
@@ -31,12 +26,8 @@ export async function POST(request: Request) {
 		id: String(result.insertedId),
 		channelId: body.channelId,
 		content: body.content,
-		author,
-		initials: author
-			.split(' ')
-			.map((s) => s[0])
-			.slice(0, 2)
-			.join(''),
+		authorName: body.authorName,
+		authorId: body.authorId,
 		createdAt: new Date().toISOString(),
 	});
 }
