@@ -162,10 +162,10 @@ export default function ClientView({
 	return (
 		<div className="h-svh flex flex-col bg-gradient-to-b from-[#330d38] to-[#230525] text-foreground">
 			<GlobalTopBar />
-			<div className="flex-1 flex min-h-0 bg-transparent/0">
+			<div className="flex-1 flex min-h-0 bg-transparent/0 mb-1">
 				<AppNavSidebar />
 				<ChannelsSidebar channels={channelLinks} directMessages={dmList} />
-				<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21]">
+				<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21] mr-1">
 					<ChannelHeader name={channelName} topic={channelTopic} />
 					<MessagesList
 						messages={messages}
