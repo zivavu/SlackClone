@@ -1,10 +1,12 @@
-import { channels } from '@/data/channels';
+import { getChannels, seedDefaultChannels } from '@/app/api/channels/actions';
 import { redirect } from 'next/navigation';
 
-export default function ClientPage() {
-	const first = channels[0];
-	if (first) {
-		redirect(`/client/${first.id}`);
+export default async function ClientPage() {
+	let channels = await getChannels();
+	if (channels.length === 0) {
+		await seedDefaultChannels();
+		channels = await getChannels();
 	}
-	return null;
+	const first = channels[0];
+	redirect(`/client/${first.id}`);
 }

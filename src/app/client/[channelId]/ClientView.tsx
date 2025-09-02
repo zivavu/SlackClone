@@ -7,7 +7,6 @@ import { ChannelsSidebar } from '@/components/ChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
-import { Channel } from '@/data/channels';
 import { authClient } from '@/lib/auth-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -18,7 +17,7 @@ export default function ClientView({
 	directMessages,
 	initialMessages,
 }: {
-	channel: Channel;
+	channel: { id: string; name: string; topic?: string };
 	channelLinks: { id: string; name: string }[];
 	directMessages: DirectMessageUser[];
 	initialMessages: Message[];
