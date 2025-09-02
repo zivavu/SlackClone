@@ -75,12 +75,19 @@ export default function ClientView({
 	});
 
 	const sendMutation = useMutation({
-		mutationFn: async ({ content }: { content: string }) => {
+		mutationFn: async ({
+			content,
+			mentions,
+		}: {
+			content: string;
+			mentions?: string[];
+		}) => {
 			const res = await fetch('/api/messages', {
 				method: 'POST',
 				body: JSON.stringify({
 					channelId,
 					content,
+					mentions,
 					authorName: session?.user.name,
 					authorId: session?.user.id,
 				}),
@@ -88,7 +95,13 @@ export default function ClientView({
 			if (!res.ok) throw new Error('Failed to send');
 			return (await res.json()) as { id: string };
 		},
-		onMutate: async ({ content }: { content: string }) => {
+		onMutate: async ({
+			content,
+			mentions,
+		}: {
+			content: string;
+			mentions?: string[];
+		}) => {
 			await queryClient.cancelQueries({ queryKey });
 			const previous = queryClient.getQueryData<Message[]>(queryKey) || [];
 			const optimistic: Message = {
@@ -97,6 +110,7 @@ export default function ClientView({
 				authorId: session?.user.id ?? 'Unknown',
 				createdAt: new Date().toISOString(),
 				content,
+				mentions,
 			};
 			queryClient.setQueryData<Message[]>(queryKey, [...previous, optimistic]);
 			return { previous };
@@ -164,19 +178,25 @@ export default function ClientView({
 			<GlobalTopBar />
 			<div className="flex-1 flex min-h-0 bg-transparent/0 mb-1">
 				<AppNavSidebar />
-				<ChannelsSidebar channels={channelLinks} directMessages={dmList} />
-				<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21] mr-1">
-					<ChannelHeader name={channelName} topic={channelTopic} />
-					<MessagesList
-						messages={messages}
-						onDelete={(id) => deleteMutation.mutate(id)}
-						onEdit={(id, content) => editMutation.mutate({ id, content })}
-					/>
-					<Composer
-						onSend={(input) => sendMutation.mutate(input)}
-						placeholder={`Message #${channelName}`}
-					/>
-				</main>
+				<div className="flex-1 flex border border-white/10 rounded-sm overflow-hidden">
+					<ChannelsSidebar channels={channelLinks} directMessages={dmList} />
+					<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21] mr-1">
+						<ChannelHeader name={channelName} topic={channelTopic} />
+						<MessagesList
+							messages={messages}
+							onDelete={(id) => deleteMutation.mutate(id)}
+							onEdit={(id, content) => editMutation.mutate({ id, content })}
+							mentionLookup={Object.fromEntries(
+								dmList.map((u) => [u.id, u.name])
+							)}
+						/>
+						<Composer
+							onSend={(input) => sendMutation.mutate(input)}
+							placeholder={`Message #${channelName}`}
+							mentionables={dmList.map((u) => ({ id: u.id, name: u.name }))}
+						/>
+					</main>
+				</div>
 			</div>
 		</div>
 	);

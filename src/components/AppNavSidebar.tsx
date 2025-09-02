@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
 
 export function AppNavSidebar() {
 	return (
-		<aside className="hidden md:flex w-20 flex-col border-r border-white/10 py-3">
+		<aside className="hidden md:flex w-20 flex-col py-3">
 			<div className="flex items-center justify-center">
 				<button className="size-10 rounded-xl bg-white/10 text-[11px] font-semibold hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20">
 					AC

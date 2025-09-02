@@ -2,6 +2,7 @@
 
 import { authClient } from '@/lib/auth-client';
 import { Pencil, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 export type Message = {
@@ -11,16 +12,19 @@ export type Message = {
 	createdAt: string;
 	updatedAt?: string;
 	content: string;
+	mentions?: string[];
 };
 
 export function MessagesList({
 	messages,
 	onDelete,
 	onEdit,
+	mentionLookup,
 }: {
 	messages: Message[];
 	onDelete?: (id: string) => void | Promise<void>;
 	onEdit?: (id: string, content: string) => void | Promise<void>;
+	mentionLookup?: Record<string, string>;
 }) {
 	const { data: session } = authClient.useSession();
 	const [editingId, setEditingId] = useState<string | null>(null);
@@ -36,6 +40,30 @@ export function MessagesList({
 		if (!onEdit) return setEditingId(null);
 		await onEdit(id, draft);
 		setEditingId(null);
+	}
+	console.log(messages);
+
+	function renderWithMentions(text: string) {
+		const parts: (string | React.JSX.Element)[] = [];
+		const regex = /<@([A-Za-z0-9_\-]+)>/g;
+		let lastIndex = 0;
+		let m: RegExpExecArray | null;
+		while ((m = regex.exec(text))) {
+			if (m.index > lastIndex) parts.push(text.slice(lastIndex, m.index));
+			const id = m[1];
+			const name = mentionLookup?.[id] || id;
+			parts.push(
+				<Link
+					key={`${id}-${m.index}`}
+					href={`/direct-messages/${id}`}
+					className="text-white/95">
+					@{name}
+				</Link>
+			);
+			lastIndex = regex.lastIndex;
+		}
+		if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+		return parts;
 	}
 
 	useEffect(() => {
@@ -97,7 +125,7 @@ export function MessagesList({
 								</div>
 							) : (
 								<p className="mt-1 text-[15px] leading-6 whitespace-pre-wrap break-words text-white/90">
-									{message.content}
+									{renderWithMentions(message.content)}
 								</p>
 							)}
 							<div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-0 -translate-y-2 ">

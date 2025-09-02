@@ -14,13 +14,15 @@ export async function POST(request: Request) {
 	}
 
 	const db = await getDb();
-	const result = await db.collection('messages').insertOne({
+	const doc = {
 		channelId: body.channelId,
 		content: body.content,
 		authorName: body.authorName,
 		authorId: body.authorId,
+		mentions: Array.isArray(body.mentions) ? body.mentions : undefined,
 		createdAt: new Date(),
-	});
+	};
+	const result = await db.collection('messages').insertOne(doc);
 
 	return NextResponse.json({
 		id: String(result.insertedId),
@@ -28,6 +30,7 @@ export async function POST(request: Request) {
 		content: body.content,
 		authorName: body.authorName,
 		authorId: body.authorId,
+		mentions: doc.mentions,
 		createdAt: new Date().toISOString(),
 	});
 }
