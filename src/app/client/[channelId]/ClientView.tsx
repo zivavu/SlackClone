@@ -187,6 +187,13 @@ export default function ClientView({
 		},
 	});
 
+	const isDm = !channelName;
+	const firstChannel =
+		channelLinks.find((c) => c.id !== channelId) || channelLinks[0];
+	const firstChannelHref = firstChannel
+		? `/client/${firstChannel.id}`
+		: '/client';
+
 	return (
 		<div className="h-svh flex flex-col bg-gradient-to-b from-[#330d38] to-[#230525] text-foreground">
 			<GlobalTopBar />
@@ -198,6 +205,9 @@ export default function ClientView({
 						<ChannelHeader
 							name={resolvedName || channelName}
 							topic={channelTopic}
+							channelId={isDm ? undefined : channelId}
+							canDelete={!isDm}
+							firstChannelHref={firstChannelHref}
 						/>
 						<MessagesList
 							messages={messages}
