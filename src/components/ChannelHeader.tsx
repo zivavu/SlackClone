@@ -42,13 +42,13 @@ export function ChannelHeader({
 	}
 
 	return (
-		<header className="h-14 flex items-center justify-between border-b border-white/10 px-3 sm:px-4 bg-black/30 backdrop-blur">
+		<header className="h-14 flex items-center justify-between border-b border-border px-3 sm:px-4 bg-card backdrop-blur">
 			<div className="min-w-0 flex items-center gap-2">
 				<h1 className="truncate text-sm sm:text-base font-semibold">
 					# {name}
 				</h1>
 				{topic ? (
-					<span className="hidden sm:inline text-xs text-white/60">
+					<span className="hidden sm:inline text-xs text-muted-foreground">
 						{topic}
 					</span>
 				) : null}
@@ -58,7 +58,7 @@ export function ChannelHeader({
 					<Dialog>
 						<DialogTrigger asChild>
 							<button
-								className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+								className="p-1.5 rounded hover:bg-foreground/10 focus:outline-none focus:ring-2 focus:ring-ring/20"
 								title="Delete channel">
 								<Trash2 className="size-5" aria-hidden />
 							</button>
@@ -73,14 +73,14 @@ export function ChannelHeader({
 							</DialogHeader>
 							<DialogFooter>
 								<DialogClose asChild>
-									<button className="rounded px-3 py-2 text-sm hover:bg-white/10">
+									<button className="rounded px-3 py-2 text-sm hover:bg-foreground/10">
 										Cancel
 									</button>
 								</DialogClose>
 								<button
 									onClick={handleDelete}
 									disabled={deleting}
-									className="rounded bg-white/10 px-3 py-2 text-sm hover:bg-white/15 disabled:opacity-50">
+									className="rounded bg-foreground/10 px-3 py-2 text-sm hover:bg-foreground/15 disabled:opacity-50">
 									{deleting ? 'Deleting…' : 'Delete channel'}
 								</button>
 							</DialogFooter>

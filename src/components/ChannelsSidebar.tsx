@@ -51,15 +51,15 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 	};
 
 	return (
-		<aside className="hidden md:flex lg:w-92 flex-col bg-gradient-to-r from-[#180d1a] to-[#1e1022] border-r border-white/20">
+		<aside className="hidden md:flex lg:w-92 flex-col bg-gradient-to-r dark:from-[#180d1a] dark:to-[#1e1022]  from-[#4d224f] to-[#4f2550] dark:border-r dark:border-white/20">
 			<div className="px-3 py-3 border-b border-white/10">
 				<div className="flex items-center justify-between">
-					<h2 className="text-sm font-semibold">Acme Corp</h2>
+					<h2 className="text-sm text-white font-semibold">Acme Corp</h2>
 					{false && (
 						<Popover open={open} onOpenChange={setOpen}>
 							<PopoverTrigger asChild>
 								<button
-									className="p-1 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+									className="p-1 rounded hover:bg-foreground/10 focus:outline-none focus:ring-2 focus:ring-ring/20"
 									title="New channel">
 									<svg
 										viewBox="0 0 24 24"
@@ -80,8 +80,8 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 									<h3 className="text-sm font-semibold">Create channel</h3>
 									<label className="block">
 										<span className="block text-xs mb-1">Channel name</span>
-										<div className="flex items-center gap-2 rounded bg-white/5 px-3 py-2">
-											<span className="text-white/50">#</span>
+										<div className="flex items-center gap-2 rounded bg-input px-3 py-2">
+											<span className="text-muted-foreground">#</span>
 											<input
 												value={name}
 												onChange={(e) => setName(e.target.value)}

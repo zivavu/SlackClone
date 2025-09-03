@@ -196,7 +196,7 @@ export function Composer({
 		<footer className="p-2 sm:p-3">
 			<form
 				ref={formRef}
-				className="rounded-xl border border-white/30 bg-[#222529] focus-within:ring-1 focus-within:ring-white/20">
+				className="rounded-xl border border-border bg-card focus-within:ring-1 focus-within:ring-ring/20">
 				<div className="px-2 sm:px-3 py-2 relative">
 					<label className="sr-only" htmlFor="message">
 						Message
@@ -204,7 +204,7 @@ export function Composer({
 					<textarea
 						id="message"
 						placeholder={placeholder}
-						className="w-full resize-none bg-transparent outline-none placeholder:text-white/40 text-[15px]"
+						className="w-full resize-none bg-transparent outline-none placeholder:text-muted-foreground text-[15px]"
 						name={reg.name}
 						onBlur={reg.onBlur}
 						onChange={handleChange}
@@ -230,8 +230,8 @@ export function Composer({
 													e.preventDefault();
 													selectMention(opt);
 												}}
-												className={`w-full text-left px-3 py-1.5 hover:bg-white/10 ${
-													idx === mentionActiveIndex ? 'bg-white/10' : ''
+												className={`w-full text-left px-3 py-1.5 hover:bg-foreground/10 ${
+													idx === mentionActiveIndex ? 'bg-foreground/10' : ''
 												}`}>
 												@{opt.name}
 											</button>
@@ -246,7 +246,7 @@ export function Composer({
 					<div className="flex items-center gap-1.5">
 						<button
 							type="button"
-							className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+							className="p-1.5 rounded hover:bg-foreground/10 focus:outline-none focus:ring-2 focus:ring-ring/20"
 							title="Upload file">
 							<svg
 								viewBox="0 0 24 24"
@@ -269,7 +269,7 @@ export function Composer({
 						</button>
 						<button
 							type="button"
-							className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+							className="p-1.5 rounded hover:bg-foreground/10 focus:outline-none focus:ring-2 focus:ring-ring/20"
 							title="Mention"
 							onClick={() => {
 								insertAtCaret('@');
@@ -298,7 +298,7 @@ export function Composer({
 							<PopoverTrigger asChild>
 								<button
 									type="button"
-									className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+									className="p-1.5 rounded hover:bg-foreground/10 focus:outline-none focus:ring-2 focus:ring-ring/20"
 									title="Emoji">
 									<svg
 										viewBox="0 0 24 24"
@@ -336,7 +336,7 @@ export function Composer({
 					</div>
 					<button
 						type={onSend ? 'button' : 'submit'}
-						className="inline-flex items-center gap-1 rounded bg-white text-black px-3 py-1.5 text-sm font-medium hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/20"
+						className="inline-flex items-center gap-1 rounded bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring/20"
 						title="Send"
 						onClick={() => {
 							if (!submitViaOnSend()) {

@@ -26,7 +26,6 @@ export function GlobalTopBar() {
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
 	useEffect(() => {
-		if (!open) return;
 		void (async () => {
 			const res = await fetch('/api/users/me');
 			if (res.ok) {
@@ -38,7 +37,7 @@ export function GlobalTopBar() {
 				setCurrentAvatarUrl(data.avatarUrl || null);
 			}
 		})();
-	}, [open]);
+	}, []);
 
 	async function handleSignOut() {
 		await authClient.signOut();

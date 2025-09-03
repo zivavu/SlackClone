@@ -1,3 +1,4 @@
+import { defaultChannels } from '@/data/channels';
 import { getDb } from '@/lib/mongodb';
 
 export type Channel = {
@@ -40,17 +41,8 @@ export async function seedDefaultChannels() {
 	const db = await getDb();
 	const count = await db.collection('channels').countDocuments();
 	if (count > 0) return { inserted: 0 };
-	const defaults = [
-		{
-			name: 'general',
-			topic: 'Company-wide announcements and work-based matters',
-		},
-		{ name: 'random', topic: 'Off-topic and watercooler chat' },
-		{ name: 'announcements', topic: 'Release notes and important updates' },
-		{ name: 'design', topic: 'Design discussions and reviews' },
-		{ name: 'engineering', topic: 'Engineering topics and code reviews' },
-	];
-	const docs = defaults.map((d) => ({ ...d, createdAt: new Date() }));
+
+	const docs = defaultChannels.map((d) => ({ ...d, createdAt: new Date() }));
 	const result = await db.collection('channels').insertMany(docs);
 	return { inserted: result.insertedCount };
 }

@@ -29,8 +29,8 @@ export function AppNavSidebar() {
 	return (
 		<aside className="hidden md:flex w-20 flex-col py-3">
 			<div className="flex items-center justify-center">
-				<button className="size-10 rounded-xl bg-white/10 text-[11px] font-semibold hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20">
-					AC
+				<button className="size-10 rounded-xl bg-white/10 text-[11px] font-semibold hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-ring/20 text-white">
+					ACME
 				</button>
 			</div>
 			<nav className="mt-3 flex-1">
@@ -42,7 +42,7 @@ export function AppNavSidebar() {
 								className={`group flex flex-col items-center gap-1 rounded ${
 									isActive ? 'text-white/90' : 'text-white/80'
 								}`}>
-								<span className="size-9 rounded-lg grid place-items-center p-2  group-hover:bg-white/20 transition-colors">
+								<span className="size-9 rounded-lg grid place-items-center p-2  group-hover:bg-foreground/20 transition-colors">
 									<Icon className="size-5" aria-hidden />
 								</span>
 								<span className="truncate">{label}</span>

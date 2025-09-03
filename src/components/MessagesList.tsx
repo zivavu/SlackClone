@@ -85,8 +85,8 @@ export function MessagesList({
 					return (
 						<li
 							key={message._id}
-							className="flex items-center gap-3 group hover:bg-white/5 px-3 sm:px-4 py-1">
-							<div className="size-9 shrink-0 rounded bg-white/10 grid place-items-center text-xs font-medium">
+							className="flex items-center gap-3 group hover:bg-foreground/5 px-3 sm:px-4 py-1">
+							<div className="size-9 shrink-0 rounded bg-foreground/10 grid place-items-center text-xs font-medium">
 								{message?.authorName?.split(' ')[0]?.[0]}
 								{message?.authorName?.split(' ')[1]?.[0]}
 							</div>
@@ -95,7 +95,7 @@ export function MessagesList({
 									<p className="text-sm font-semibold leading-none">
 										{message.authorName}
 									</p>
-									<span className="text-[11px] text-white/50">
+									<span className="text-[11px] text-muted-foreground">
 										{new Date(message.createdAt).toLocaleTimeString('en-US', {
 											hour: 'numeric',
 											minute: '2-digit',
@@ -105,7 +105,7 @@ export function MessagesList({
 								{editingId === message._id ? (
 									<div className="mt-1">
 										<textarea
-											className="w-full rounded bg-white/5 px-2 py-1 text-[15px] outline-none focus:ring-2 focus:ring-white/20"
+											className="w-full rounded bg-input px-2 py-1 text-[15px] outline-none focus:ring-2 focus:ring-ring/20"
 											rows={2}
 											value={draft}
 											onChange={(e) => setDraft(e.target.value)}
@@ -113,36 +113,36 @@ export function MessagesList({
 										<div className="mt-1 flex items-center gap-2">
 											<button
 												onClick={() => saveEdit(message._id)}
-												className="px-2 py-1 rounded bg-white text-black text-sm">
+												className="px-2 py-1 rounded bg-primary text-primary-foreground text-sm">
 												Save
 											</button>
 											<button
 												onClick={() => setEditingId(null)}
-												className="px-2 py-1 rounded bg-white/10 text-sm">
+												className="px-2 py-1 rounded bg-foreground/10 text-sm">
 												Cancel
 											</button>
 										</div>
 									</div>
 								) : (
-									<p className="mt-1 text-[15px] leading-6 whitespace-pre-wrap break-words text-white/90">
+									<p className="mt-1 text-[15px] leading-6 whitespace-pre-wrap break-words">
 										{renderWithMentions(message.content)}
 									</p>
 								)}
 								<div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-0 -translate-y-2 ">
 									{isOwner ? (
-										<div className="flex items-center gap-1 rounded-full bg-black/60 backdrop-blur px-1.5 py-1 border border-white/10 shadow">
+										<div className="flex items-center gap-1 rounded-full bg-background/80 backdrop-blur px-1.5 py-1 border border-border shadow">
 											<button
 												type="button"
 												title="Edit"
 												onClick={() => startEdit(message._id, message.content)}
-												className="p-1 rounded text-[12px] hover:bg-white/30">
+												className="p-1 rounded text-[12px] hover:bg-foreground/30">
 												<Pencil className="size-4" aria-hidden />
 											</button>
 											<button
 												type="button"
 												title="Delete"
 												onClick={() => onDelete?.(message._id)}
-												className="p-1 rounded hover:bg-white/30">
+												className="p-1 rounded hover:bg-foreground/30">
 												<Trash2 className="size-4" aria-hidden />
 											</button>
 										</div>

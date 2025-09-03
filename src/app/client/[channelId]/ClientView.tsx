@@ -7,6 +7,7 @@ import { ChannelsSidebar } from '@/components/ChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
+import { defaultChannels } from '@/data/channels';
 import { authClient } from '@/lib/auth-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
@@ -203,18 +204,20 @@ export default function ClientView({
 		: '/client';
 
 	return (
-		<div className="h-svh flex flex-col bg-gradient-to-b from-[#330d38] to-[#230525] text-foreground">
+		<div className="h-svh flex flex-col bg-gradient-to-b dark:from-[#330d38] dark:to-[#230525] from-[#390b3a] to-[#370838] text-foreground">
 			<GlobalTopBar />
-			<div className="flex-1 flex min-h-0 bg-transparent/0 mb-1">
+			<div className="flex-1 flex min-h-0 mb-1">
 				<AppNavSidebar />
-				<div className="flex-1 flex border border-white/20 rounded-sm overflow-hidden">
+				<div className="flex-1 flex dark:border border-border rounded-sm overflow-hidden">
 					<ChannelsSidebar channels={channelLinks} directMessages={dmList} />
-					<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21] mr-1">
+					<main className="flex-1 flex min-w-0 flex-col bg-card mr-1">
 						<ChannelHeader
 							name={resolvedName || channelName}
 							topic={channelTopic}
 							channelId={isDm ? undefined : channelId}
-							canDelete={!isDm}
+							canDelete={
+								!isDm && !defaultChannels.some((c) => c.name === channelName)
+							}
 							firstChannelHref={firstChannelHref}
 						/>
 						<MessagesList
