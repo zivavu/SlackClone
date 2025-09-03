@@ -140,7 +140,12 @@ export default function ClientView({
 
 	const deleteMutation = useMutation({
 		mutationFn: async (id: string) => {
-			const res = await fetch(`/api/messages/${id}`, { method: 'DELETE' });
+			const res = await fetch(`/api/messages/${id}`, {
+				method: 'DELETE',
+				headers: {
+					'x-user-id': String(session?.user.id ?? ''),
+				},
+			});
 			if (!res.ok) throw new Error('Failed to delete');
 		},
 		onMutate: async (id: string) => {
@@ -166,6 +171,7 @@ export default function ClientView({
 			const res = await fetch(`/api/messages/${id}`, {
 				method: 'PATCH',
 				body: JSON.stringify({ content }),
+				headers: { 'x-user-id': String(session?.user.id ?? '') },
 			});
 			if (!res.ok) throw new Error('Failed to edit');
 		},
