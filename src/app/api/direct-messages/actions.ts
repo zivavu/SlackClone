@@ -6,10 +6,9 @@ export type DirectMessageUser = {
 	id: string;
 	name: string;
 	status: 'online' | 'away' | 'offline';
-	avatarUrl?: string;
+	image?: string;
 };
 
-type UserRow = { _id: string; name?: string; avatarFileId?: string };
 type PresenceRow = {
 	userId: string;
 	status?: 'online' | 'away' | 'offline';
@@ -22,9 +21,7 @@ export async function getDirectMessages(): Promise<DirectMessageUser[]> {
 	const presenceCol = db.collection('presence');
 
 	const [users, presenceDocs] = await Promise.all([
-		usersCol
-			.aggregate<UserRow>([{ $project: { id: 1, name: 1, avatarFileId: 1 } }])
-			.toArray(),
+		usersCol.aggregate([{ $project: { id: 1, name: 1, image: 1 } }]).toArray(),
 		presenceCol
 			.aggregate<PresenceRow>([
 				{ $project: { userId: 1, status: 1, lastSeenAt: 1 } },
@@ -51,12 +48,10 @@ export async function getDirectMessages(): Promise<DirectMessageUser[]> {
 		.map((user) => ({
 			id: user._id.toString(),
 			name: user.name!,
-			avatarUrl: user.avatarFileId
-				? `/api/files/${user.avatarFileId}`
-				: undefined,
+			image: user.image,
 			status:
 				(userIdToPresence.get(user._id) as DirectMessageUser['status']) ||
 				'offline',
 		}))
-		.sort((a, b) => a.name.localeCompare(b.name));
+		.sort((a, b) => a.name.localeCompare(b.name)) as DirectMessageUser[];
 }

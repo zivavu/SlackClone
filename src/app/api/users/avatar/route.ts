@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 			.collection('user')
 			.updateOne(
 				{ _id: new ObjectId(userId) },
-				{ $set: { avatarFileId: fileId } }
+				{ $set: { image: `/api/files/${fileId}` } }
 			);
 
 		return NextResponse.json({ fileId, url: `/api/files/${fileId}` });

@@ -2,6 +2,7 @@
 
 import { authClient } from '@/lib/auth-client';
 import { Pencil, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
@@ -20,11 +21,13 @@ export function MessagesList({
 	onDelete,
 	onEdit,
 	mentionLookup,
+	avatarLookup,
 }: {
 	messages: Message[];
 	onDelete?: (id: string) => void | Promise<void>;
 	onEdit?: (id: string, content: string) => void | Promise<void>;
 	mentionLookup?: Record<string, string>;
+	avatarLookup?: Record<string, string | undefined>;
 }) {
 	const { data: session } = authClient.useSession();
 	const [editingId, setEditingId] = useState<string | null>(null);
@@ -79,29 +82,53 @@ export function MessagesList({
 
 	return (
 		<section ref={containerRef} className="flex-1 overflow-y-auto py-4">
-			<ol className="space-y-4">
-				{messages.map((message) => {
+			<ol>
+				{messages.map((message, idx) => {
 					const isOwner = message.authorId === session?.user.id;
+					const prev = messages[idx - 1];
+					const createdAtMs = new Date(message.createdAt).getTime();
+					const prevCreatedAtMs = prev ? new Date(prev.createdAt).getTime() : 0;
+					const fiveMinutesMs = 10 * 60 * 1000;
+					const showAvatar =
+						!prev ||
+						prev.authorId !== message.authorId ||
+						createdAtMs - prevCreatedAtMs >= fiveMinutesMs;
 					return (
 						<li
 							key={message._id}
 							className="flex items-center gap-3 group hover:bg-foreground/5 px-3 sm:px-4 py-1">
-							<div className="size-9 shrink-0 rounded bg-foreground/10 grid place-items-center text-xs font-medium">
-								{message?.authorName?.split(' ')[0]?.[0]}
-								{message?.authorName?.split(' ')[1]?.[0]}
-							</div>
+							{showAvatar ? (
+								avatarLookup?.[message.authorId] ? (
+									<Image
+										src={avatarLookup[message.authorId] as string}
+										alt={message.authorName}
+										className="size-9 shrink-0 rounded object-cover"
+										width={36}
+										height={36}
+									/>
+								) : (
+									<div className="size-9 shrink-0 rounded bg-foreground/10 grid place-items-center text-xs font-medium">
+										{message?.authorName?.split(' ')[0]?.[0]}
+										{message?.authorName?.split(' ')[1]?.[0]}
+									</div>
+								)
+							) : (
+								<div className="w-9 shrink-0" />
+							)}
 							<div className="min-w-0 flex-1 relative">
-								<div className="flex items-baseline gap-2">
-									<p className="text-sm font-semibold leading-none">
-										{message.authorName}
-									</p>
-									<span className="text-[11px] text-muted-foreground">
-										{new Date(message.createdAt).toLocaleTimeString('en-US', {
-											hour: 'numeric',
-											minute: '2-digit',
-										})}
-									</span>
-								</div>
+								{showAvatar && (
+									<div className="flex items-baseline gap-2">
+										<p className="text-sm font-semibold leading-none">
+											{message.authorName}
+										</p>
+										<span className="text-[11px] text-muted-foreground">
+											{new Date(message.createdAt).toLocaleTimeString('en-US', {
+												hour: 'numeric',
+												minute: '2-digit',
+											})}
+										</span>
+									</div>
+								)}
 								{editingId === message._id ? (
 									<div className="mt-1">
 										<textarea

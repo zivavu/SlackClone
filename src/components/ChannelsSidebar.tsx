@@ -232,9 +232,9 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 										href={`/client/${channnelId}`}
 										className="flex items-center gap-2 rounded px-2 py-1.5 text-white/90 hover:bg-white/5">
 										<span className="relative inline-flex items-center justify-center">
-											{dm.avatarUrl ? (
+											{dm.image ? (
 												<Image
-													src={dm.avatarUrl}
+													src={dm.image}
 													alt={dm.name}
 													className="size-5 rounded object-cover"
 													width={20}

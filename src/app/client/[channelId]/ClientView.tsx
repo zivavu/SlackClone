@@ -233,6 +233,9 @@ export default function ClientView({
 							mentionLookup={Object.fromEntries(
 								dmList.map((u) => [u.id, u.name])
 							)}
+							avatarLookup={Object.fromEntries(
+								dmList.map((u) => [u.id, u.image])
+							)}
 						/>
 						<Composer
 							onSend={(input) => sendMutation.mutate(input)}

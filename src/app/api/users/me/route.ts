@@ -16,15 +16,14 @@ export async function GET(request: Request) {
 	const db = await getDb();
 	const user = await db
 		.collection('user')
-		.findOne<{ _id: ObjectId; name?: string; avatarFileId?: string }>(
+		.findOne<{ _id: ObjectId; name?: string; image?: string }>(
 			{ _id: new ObjectId(userId) },
-			{ projection: { name: 1, avatarFileId: 1 } }
+			{ projection: { name: 1, image: 1 } }
 		);
 
 	return NextResponse.json({
 		id: userId,
 		name: user?.name || '',
-		avatarFileId: user?.avatarFileId,
-		avatarUrl: user?.avatarFileId ? `/api/files/${user.avatarFileId}` : null,
+		image: `/api/files/${user?.image}`,
 	});
 }

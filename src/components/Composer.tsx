@@ -336,7 +336,7 @@ export function Composer({
 					</div>
 					<button
 						type={onSend ? 'button' : 'submit'}
-						className="inline-flex items-center gap-1 rounded bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring/20"
+						className="inline-flex items-center gap-1 rounded bg-white text-black px-3 py-1.5 text-sm font-medium hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/20"
 						title="Send"
 						onClick={() => {
 							if (!submitViaOnSend()) {

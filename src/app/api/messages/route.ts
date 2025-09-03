@@ -19,18 +19,9 @@ export async function POST(request: Request) {
 		content: body.content,
 		authorName: body.authorName,
 		authorId: body.authorId,
+		image: body.image,
 		mentions: Array.isArray(body.mentions) ? body.mentions : undefined,
 		createdAt: new Date(),
 	};
-	const result = await db.collection('messages').insertOne(doc);
-
-	return NextResponse.json({
-		id: String(result.insertedId),
-		channelId: body.channelId,
-		content: body.content,
-		authorName: body.authorName,
-		authorId: body.authorId,
-		mentions: doc.mentions,
-		createdAt: new Date().toISOString(),
-	});
+	await db.collection('messages').insertOne(doc);
 }
