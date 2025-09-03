@@ -3,7 +3,7 @@
 import GithubAuthButton from '@/components/GithubAuthButton';
 import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -14,7 +14,7 @@ export default function SignUpPage() {
 	const searchParams = useSearchParams();
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-
+	const router = useRouter();
 	const { register, handleSubmit } = useForm<FormValues>();
 
 	const redirectTo = searchParams.get('redirect') || '/client';
@@ -24,7 +24,10 @@ export default function SignUpPage() {
 		setError(null);
 		const { error } = await authClient.signUp.email(
 			{ email, password, name, callbackURL: redirectTo },
-			{ onError: (ctx: CallbackCtx) => setError(ctx.error.message) }
+			{
+				onError: (ctx: CallbackCtx) => setError(ctx.error.message),
+				onSuccess: () => router.push(redirectTo),
+			}
 		);
 		if (error) setError(error?.message ?? null);
 		setIsLoading(false);

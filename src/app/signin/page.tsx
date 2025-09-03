@@ -24,9 +24,7 @@ export default function LoginPage() {
 		setError(null);
 		const { error } = await authClient.signIn.email(
 			{ email, password, callbackURL: redirectTo, rememberMe: true },
-			{
-				onError: (ctx: CallbackCtx) => setError(ctx.error.message),
-			}
+			{ onError: (ctx: CallbackCtx) => setError(ctx.error.message) }
 		);
 		if (error) setError(error?.message ?? null);
 		setIsLoading(false);

@@ -1,15 +1,68 @@
 'use client';
 
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 import { authClient } from '@/lib/auth-client';
+import { useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 import ThemeToggle from './ThemeToggle';
 
 export function GlobalTopBar() {
 	const router = useRouter();
+	const queryClient = useQueryClient();
+	const [open, setOpen] = useState(false);
+	const [saving, setSaving] = useState(false);
+	const [name, setName] = useState('');
+	const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(null);
+	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+	useEffect(() => {
+		if (!open) return;
+		void (async () => {
+			const res = await fetch('/api/users/me');
+			if (res.ok) {
+				const data = (await res.json()) as {
+					name?: string;
+					avatarUrl: string | null;
+				};
+				setName(data?.name ?? '');
+				setCurrentAvatarUrl(data.avatarUrl || null);
+			}
+		})();
+	}, [open]);
+
 	async function handleSignOut() {
 		await authClient.signOut();
 		router.push('/signin');
 	}
+
+	const {
+		getRootProps,
+		getInputProps,
+		open: openFileDialog,
+		isDragActive,
+	} = useDropzone({
+		multiple: false,
+		accept: { 'image/*': [] },
+		noClick: true,
+		onDrop: (accepted) => {
+			const f = accepted[0];
+			if (f) {
+				const url = URL.createObjectURL(f);
+				setPreviewUrl(url);
+				setSelectedFile(f);
+			}
+		},
+	});
 	return (
 		<header className="h-12 shrink-0 text-white">
 			<div className="h-full px-3 sm:px-4 flex items-center gap-2">
@@ -56,57 +109,114 @@ export function GlobalTopBar() {
 					</label>
 				</div>
 
-				{/* Right cluster */}
 				<div className="flex items-center gap-1.5">
 					<ThemeToggle />
-					<button
-						className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-						title="Help">
-						<svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden>
-							<circle
-								cx="12"
-								cy="12"
-								r="9"
-								stroke="currentColor"
-								strokeWidth="2"
+
+					<Dialog open={open} onOpenChange={setOpen}>
+						<DialogTrigger asChild>
+							<button
+								className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+								title="Profile">
+								<svg
+									viewBox="0 0 24 24"
+									className="size-5"
+									fill="currentColor"
+									aria-hidden>
+									<path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-3.5 0-7 1.75-7 5v1h14v-1c0-3.25-3.5-5-7-5Z" />
+								</svg>
+							</button>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Profile</DialogTitle>
+							</DialogHeader>
+							<label className="block text-sm">Display name</label>
+							<input
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								placeholder="Your name"
+								className="w-full rounded bg-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-white/20 mb-3"
 							/>
-							<path
-								d="M12 16v-1a3 3 0 1 1 3-3"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-							/>
-							<circle cx="12" cy="18" r="1" fill="currentColor" />
-						</svg>
-					</button>
-					<button
-						className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-						title="Notifications">
-						<svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden>
-							<path
-								d="M6 9a6 6 0 1 1 12 0v5l2 2H4l2-2Z"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-							/>
-							<path
-								d="M10 19a2 2 0 0 0 4 0"
-								stroke="currentColor"
-								strokeWidth="2"
-							/>
-						</svg>
-					</button>
-					<button
-						className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-						title="Profile">
-						<svg
-							viewBox="0 0 24 24"
-							className="size-5"
-							fill="currentColor"
-							aria-hidden>
-							<path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-3.5 0-7 1.75-7 5v1h14v-1c0-3.25-3.5-5-7-5Z" />
-						</svg>
-					</button>
+							<label className="block text-sm">Profile picture</label>
+							<div className="mb-3">
+								<div className="size-20 rounded-full overflow-hidden bg-white/10 grid place-items-center">
+									{previewUrl || currentAvatarUrl ? (
+										<Image
+											src={previewUrl || currentAvatarUrl || ''}
+											alt="Avatar preview"
+											width={80}
+											height={80}
+											className="object-cover size-20"
+										/>
+									) : (
+										<span className="text-xs text-white/60">No picture</span>
+									)}
+								</div>
+							</div>
+							<div
+								{...getRootProps()}
+								className={`mt-1 border border-dashed rounded p-4 text-sm cursor-pointer ${
+									isDragActive ? 'bg-white/10' : 'bg-white/5'
+								}`}>
+								<input {...getInputProps()} />
+								<p className="text-white/80">
+									Drag & drop an image here, or
+									<button
+										type="button"
+										onClick={openFileDialog}
+										className="underline pl-1">
+										browse
+									</button>
+								</p>
+							</div>
+							{selectedFile ? (
+								<p className="text-xs text-white/60 mt-1">
+									Ready to upload: {selectedFile.name}
+								</p>
+							) : null}
+							<div className="flex justify-end gap-2 mt-4">
+								<button
+									disabled={saving}
+									onClick={async () => {
+										if (!name.trim()) return;
+										setSaving(true);
+										try {
+											const requests: Promise<unknown>[] = [];
+											requests.push(
+												fetch('/api/users/name', {
+													method: 'PATCH',
+													headers: { 'Content-Type': 'application/json' },
+													body: JSON.stringify({ name: name.trim() }),
+												})
+											);
+											if (selectedFile) {
+												requests.push(
+													fetch('/api/users/avatar', {
+														method: 'POST',
+														headers: {
+															'content-type':
+																selectedFile.type || 'application/octet-stream',
+														},
+														body: selectedFile,
+													})
+												);
+											}
+											await Promise.all(requests);
+											router.refresh();
+											queryClient.invalidateQueries({
+												queryKey: ['direct-messages'],
+											});
+											setOpen(false);
+										} finally {
+											setSaving(false);
+										}
+									}}
+									className="rounded bg-white/10 px-3 py-2 text-sm hover:bg-white/15 disabled:opacity-50">
+									{saving ? 'Saving…' : 'Save'}
+								</button>
+							</div>
+						</DialogContent>
+					</Dialog>
 					<button
 						onClick={handleSignOut}
 						className="p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"

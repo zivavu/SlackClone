@@ -207,7 +207,7 @@ export default function ClientView({
 			<GlobalTopBar />
 			<div className="flex-1 flex min-h-0 bg-transparent/0 mb-1">
 				<AppNavSidebar />
-				<div className="flex-1 flex border border-white/10 rounded-sm overflow-hidden">
+				<div className="flex-1 flex border border-white/20 rounded-sm overflow-hidden">
 					<ChannelsSidebar channels={channelLinks} directMessages={dmList} />
 					<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21] mr-1">
 						<ChannelHeader

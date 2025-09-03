@@ -7,6 +7,8 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { authClient } from '@/lib/auth-client';
+import { Headphones, MessageSquare, Pencil } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -49,7 +51,7 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 	};
 
 	return (
-		<aside className="hidden md:flex w-64 lg:w-72 flex-col bg-gradient-to-b from-[#180d1a] to-[#1e1022]">
+		<aside className="hidden md:flex lg:w-92 flex-col bg-gradient-to-r from-[#180d1a] to-[#1e1022] border-r border-white/20">
 			<div className="px-3 py-3 border-b border-white/10">
 				<div className="flex items-center justify-between">
 					<h2 className="text-sm font-semibold">Acme Corp</h2>
@@ -118,38 +120,35 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 						</Popover>
 					)}
 				</div>
-				<div className="mt-3">
-					<label className="relative block">
-						<span className="sr-only">Search</span>
-						<input
-							type="text"
-							placeholder="Search"
-							className="w-full rounded bg-white/5 px-8 py-2 text-sm placeholder:text-white/40 outline-none focus:ring-2 focus:ring-white/20"
-						/>
-						<svg
-							viewBox="0 0 24 24"
-							className="size-4 absolute left-2 top-1/2 -translate-y-1/2 text-white/60"
-							fill="none"
-							aria-hidden>
-							<circle
-								cx="11"
-								cy="11"
-								r="7"
-								stroke="currentColor"
-								strokeWidth="2"
-							/>
-							<path
-								d="m20 20-3-3"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-							/>
-						</svg>
-					</label>
-				</div>
 			</div>
 
-			<nav className="flex-1 overflow-y-auto px-3 py-2 text-sm">
+			<nav className="flex-1 overflow-y-auto px-3 py-2 text-[15px]">
+				<ul className="space-y-1 mb-3">
+					<li>
+						<button className="w-full flex items-center justify-between rounded px-2 py-1.5 text-white/90 hover:bg-white/5">
+							<span className="flex items-center gap-2">
+								<MessageSquare className="size-4 text-white/70" aria-hidden />
+								<span>Threads</span>
+							</span>
+						</button>
+					</li>
+					<li>
+						<button className="w-full flex items-center justify-between rounded px-2 py-1.5 text-white/90 hover:bg-white/5">
+							<span className="flex items-center gap-2">
+								<Headphones className="size-4 text-white/70" aria-hidden />
+								<span>Huddles</span>
+							</span>
+						</button>
+					</li>
+					<li>
+						<button className="w-full flex items-center justify-between rounded px-2 py-1.5 text-white/90 hover:bg-white/5">
+							<span className="flex items-center gap-2">
+								<Pencil className="size-4 text-white/70" aria-hidden />
+								<span>Drafts & sent</span>
+							</span>
+						</button>
+					</li>
+				</ul>
 				<div>
 					<p className="px-2 text-white/60 uppercase tracking-wide text-[11px]">
 						Channels
@@ -159,7 +158,7 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 							<li key={ch.id}>
 								<Link
 									href={`/client/${ch.id}`}
-									className="flex items-center gap-2 rounded px-2 py-1.5 text-white/90 hover:bg-white/5">
+									className="flex items-center gap-2 rounded  px-2 py-1.5 text-white/90 hover:bg-white/5">
 									<span className="text-white/50">#</span>
 									<span className="truncate">{ch.name}</span>
 								</Link>
@@ -171,7 +170,7 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 							<PopoverTrigger asChild>
 								<button className="w-full flex items-center gap-2 rounded px-2 py-1.5 text-white/90 hover:bg-white/5">
 									<span className="text-white/50">+</span>
-									<span className="truncate">Add channels</span>
+									<span className="truncate">Add channel</span>
 								</button>
 							</PopoverTrigger>
 							<PopoverContent sideOffset={8} className="w-96 p-0">
@@ -233,13 +232,23 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 										href={`/client/${channnelId}`}
 										className="flex items-center gap-2 rounded px-2 py-1.5 text-white/90 hover:bg-white/5">
 										<span className="relative inline-flex items-center justify-center">
-											<span className="size-5 rounded bg-white/10 text-[10px] grid place-items-center">
-												{dm.name
-													.split(' ')
-													.map((n) => n[0])
-													.slice(0, 2)
-													.join('')}
-											</span>
+											{dm.avatarUrl ? (
+												<Image
+													src={dm.avatarUrl}
+													alt={dm.name}
+													className="size-5 rounded object-cover"
+													width={20}
+													height={20}
+												/>
+											) : (
+												<span className="size-5 rounded bg-white/10 text-[10px] grid place-items-center">
+													{dm.name
+														.split(' ')
+														.map((n) => n[0])
+														.slice(0, 2)
+														.join('')}
+												</span>
+											)}
 											<span
 												className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full border border-black/60"
 												style={{

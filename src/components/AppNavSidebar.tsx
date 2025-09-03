@@ -34,7 +34,7 @@ export function AppNavSidebar() {
 				</button>
 			</div>
 			<nav className="mt-3 flex-1">
-				<ul className="space-y-4 text-[12px]">
+				<ul className="space-y-2 text-[12px]">
 					{navItems.map(({ label, href, icon: Icon, isActive }) => (
 						<li key={label}>
 							<Link
