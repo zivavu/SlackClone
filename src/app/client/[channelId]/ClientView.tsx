@@ -140,12 +140,7 @@ export default function ClientView({
 
 	const deleteMutation = useMutation({
 		mutationFn: async (id: string) => {
-			const res = await fetch(`/api/messages/${id}`, {
-				method: 'DELETE',
-				headers: {
-					'x-user-id': String(session?.user.id ?? ''),
-				},
-			});
+			const res = await fetch(`/api/messages/${id}`, { method: 'DELETE' });
 			if (!res.ok) throw new Error('Failed to delete');
 		},
 		onMutate: async (id: string) => {
@@ -167,11 +162,18 @@ export default function ClientView({
 	});
 
 	const editMutation = useMutation({
-		mutationFn: async ({ id, content }: { id: string; content: string }) => {
+		mutationFn: async ({
+			id,
+			content,
+			authorId,
+		}: {
+			id: string;
+			content: string;
+			authorId: string;
+		}) => {
 			const res = await fetch(`/api/messages/${id}`, {
 				method: 'PATCH',
-				body: JSON.stringify({ content }),
-				headers: { 'x-user-id': String(session?.user.id ?? '') },
+				body: JSON.stringify({ content, authorId }),
 			});
 			if (!res.ok) throw new Error('Failed to edit');
 		},
@@ -218,7 +220,13 @@ export default function ClientView({
 						<MessagesList
 							messages={messages}
 							onDelete={(id) => deleteMutation.mutate(id)}
-							onEdit={(id, content) => editMutation.mutate({ id, content })}
+							onEdit={(id, content) =>
+								editMutation.mutate({
+									id,
+									content,
+									authorId: session?.user.id ?? '',
+								})
+							}
 							mentionLookup={Object.fromEntries(
 								dmList.map((u) => [u.id, u.name])
 							)}

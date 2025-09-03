@@ -54,8 +54,8 @@ export function MessagesList({
 			parts.push(
 				<Link
 					key={`${id}-${m.index}`}
-					href={`/direct-messages/${id}`}
-					className="text-white/95">
+					href={`/client/${[session?.user.id, id].sort().join('_')}`}
+					className="text-blue-200">
 					@{name}
 				</Link>
 			);
