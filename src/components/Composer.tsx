@@ -67,10 +67,8 @@ export function Composer({
 		});
 	}
 
-	// emoji state
 	const [emojiOpen, setEmojiOpen] = useState(false);
 
-	// mention state
 	const [mentionOpen, setMentionOpen] = useState(false);
 	const [mentionQuery, setMentionQuery] = useState('');
 	const [mentionActiveIndex, setMentionActiveIndex] = useState(0);

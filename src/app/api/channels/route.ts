@@ -8,11 +8,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
 	try {
-		const { name, topic } = await req.json();
+		const { name, topic, id } = await req.json();
 		if (!name || typeof name !== 'string') {
 			return NextResponse.json({ error: 'name is required' }, { status: 400 });
 		}
-		const result = await createChannel({ name, topic });
+		const result = await createChannel({ name, topic, id });
 		return NextResponse.json(result, { status: 201 });
 	} catch {
 		return NextResponse.json({ error: 'Invalid request' }, { status: 400 });

@@ -41,7 +41,6 @@ export function MessagesList({
 		await onEdit(id, draft);
 		setEditingId(null);
 	}
-	console.log(messages);
 
 	function renderWithMentions(text: string) {
 		const parts: (string | React.JSX.Element)[] = [];
@@ -78,7 +77,6 @@ export function MessagesList({
 		el.scrollTop = el.scrollHeight;
 	}, [messages]);
 
-	console.log(messages);
 	return (
 		<section ref={containerRef} className="flex-1 overflow-y-auto py-4">
 			<ol className="space-y-4">

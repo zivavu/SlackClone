@@ -9,7 +9,7 @@ import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
 import { authClient } from '@/lib/auth-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export default function ClientView({
 	channel,
@@ -61,6 +61,20 @@ export default function ClientView({
 		refetchInterval: 20000,
 		staleTime: 5000,
 	});
+
+	const resolvedName = useMemo(() => {
+		if (channelName) return channelName;
+		const selfId =
+			session?.user.id || session?.user.email || session?.user.name;
+		if (!selfId) return '';
+		const parts = channelId.split('_');
+		if (parts.length !== 2) return '';
+		const peerId = parts.find((p) => p !== selfId)
+			? parts.find((p) => p !== selfId)
+			: selfId;
+		const peer = dmList.find((u) => u.id === peerId);
+		return peer?.name || '';
+	}, [channelName, channelId, dmList, session]);
 
 	const { data: messages = initialMessages } = useQuery({
 		queryKey,
@@ -181,7 +195,10 @@ export default function ClientView({
 				<div className="flex-1 flex border border-white/10 rounded-sm overflow-hidden">
 					<ChannelsSidebar channels={channelLinks} directMessages={dmList} />
 					<main className="flex-1 flex min-w-0 flex-col bg-[#1a1d21] mr-1">
-						<ChannelHeader name={channelName} topic={channelTopic} />
+						<ChannelHeader
+							name={resolvedName || channelName}
+							topic={channelTopic}
+						/>
 						<MessagesList
 							messages={messages}
 							onDelete={(id) => deleteMutation.mutate(id)}
@@ -192,7 +209,7 @@ export default function ClientView({
 						/>
 						<Composer
 							onSend={(input) => sendMutation.mutate(input)}
-							placeholder={`Message #${channelName}`}
+							placeholder={`Message #${resolvedName || channelName}`}
 							mentionables={dmList.map((u) => ({ id: u.id, name: u.name }))}
 						/>
 					</main>
