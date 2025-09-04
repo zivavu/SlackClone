@@ -1,6 +1,6 @@
 'use server';
 
-import { MongoClient, type Db } from 'mongodb';
+import { MongoClient, ServerApiVersion, type Db } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB || 'slack_clone';
@@ -14,7 +14,13 @@ let cachedDb: Db | null = null;
 
 export async function getMongoClient(): Promise<MongoClient> {
 	if (cachedClient) return cachedClient;
-	const client = new MongoClient(uri!);
+	const client = new MongoClient(uri!, {
+		serverApi: {
+			version: ServerApiVersion.v1,
+			strict: true,
+			deprecationErrors: true,
+		},
+	});
 	cachedClient = await client.connect();
 	return cachedClient;
 }
