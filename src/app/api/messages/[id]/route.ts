@@ -32,7 +32,7 @@ export async function DELETE(
 
 export async function PATCH(
 	request: Request,
-	context: { params: Promise<{ id: string; authorId: string }> }
+	context: { params: Promise<{ id: string }> }
 ) {
 	const { id } = await context.params;
 	if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
