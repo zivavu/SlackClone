@@ -112,7 +112,6 @@ export function Composer({
 
 	useEffect(() => {
 		updateMentionState();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [contentValue]);
 
 	const mentionOptions = useMemo(() => {

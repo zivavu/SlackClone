@@ -5,7 +5,7 @@ import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
+export async function DELETE(request: Request) {
 	const session = await auth.api
 		.getSession({ headers: request.headers })
 		.catch(() => null);
@@ -14,16 +14,13 @@ export async function GET(request: Request) {
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
 	const db = await getDb();
-	const user = await db
-		.collection('user')
-		.findOne<{ _id: ObjectId; name?: string; image?: string }>(
-			{ _id: new ObjectId(userId) },
-			{ projection: { name: 1, image: 1 } }
-		);
 
-	return NextResponse.json({
-		id: userId,
-		name: user?.name || '',
-		image: user?.image,
-	});
+	await db.collection('user').deleteOne({ _id: new ObjectId(userId) });
+	await db.collection('presence').deleteMany({ userId });
+	await db
+		.collection('message')
+		?.deleteMany?.({ authorId: userId })
+		.catch(() => {});
+
+	return NextResponse.json({ ok: true });
 }

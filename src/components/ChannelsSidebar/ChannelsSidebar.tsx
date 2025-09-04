@@ -54,7 +54,7 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 		<aside className="hidden md:flex lg:w-92 flex-col bg-gradient-to-r dark:from-[#180d1a] dark:to-[#1e1022]  from-[#4d224f] to-[#4f2550] dark:border-r dark:border-white/20">
 			<div className="px-3 py-3 border-b border-white/10">
 				<div className="flex items-center justify-between">
-					<h2 className="text-sm text-white font-semibold">Acme Corp</h2>
+					<h2 className="text-sm text-white font-semibold">Ipsum Corp</h2>
 					{false && (
 						<Popover open={open} onOpenChange={setOpen}>
 							<PopoverTrigger asChild>

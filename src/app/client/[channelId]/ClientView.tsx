@@ -3,7 +3,7 @@
 import { DirectMessageUser } from '@/app/api/direct-messages/actions';
 import { AppNavSidebar } from '@/components/AppNavSidebar';
 import { ChannelHeader } from '@/components/ChannelHeader';
-import { ChannelsSidebar } from '@/components/ChannelsSidebar';
+import { ChannelsSidebar } from '@/components/ChannelsSidebar/ChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
