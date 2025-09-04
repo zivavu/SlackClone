@@ -143,7 +143,7 @@ export function MessagesList({
 							) : null}
 							<li
 								key={message._id}
-								className="flex items-center gap-3 group hover:bg-foreground/5 px-3 sm:px-4 py-1">
+								className="flex gap-3 group hover:bg-foreground/5 px-3 sm:px-4 py-1">
 								{showAvatar ? (
 									avatarLookup?.[message.authorId] ? (
 										<Image
@@ -165,7 +165,7 @@ export function MessagesList({
 								<div className="min-w-0 flex-1 relative">
 									{showAvatar && (
 										<div className="flex items-baseline gap-2">
-											<p className="text-sm font-semibold leading-none">
+											<p className="text-[15px] font-semibold leading-none">
 												{message.authorName}
 											</p>
 											<span className="text-[11px] text-muted-foreground">

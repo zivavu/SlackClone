@@ -50,8 +50,9 @@ export async function getDirectMessages(): Promise<DirectMessageUser[]> {
 			name: user.name!,
 			image: user.image,
 			status:
-				(userIdToPresence.get(user._id) as DirectMessageUser['status']) ||
-				'offline',
+				(userIdToPresence.get(
+					user._id.toString()
+				) as DirectMessageUser['status']) || 'offline',
 		}))
 		.sort((a, b) => a.name.localeCompare(b.name)) as DirectMessageUser[];
 }
