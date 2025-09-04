@@ -25,7 +25,7 @@ export default function ClientView({
 }) {
 	const { id: channelId, name: channelName, topic: channelTopic } = channel;
 	const queryClient = useQueryClient();
-	const queryKey = ['messages', channelId];
+	const queryKey = useMemo(() => ['messages', channelId] as const, [channelId]);
 	const { data: session } = authClient.useSession();
 
 	useEffect(() => {
@@ -85,9 +85,50 @@ export default function ClientView({
 			return (await res.json()) as Message[];
 		},
 		initialData: initialMessages,
-		refetchInterval: 20000,
 		staleTime: 5000,
 	});
+
+	useEffect(() => {
+		const es = new EventSource(`/api/channels/${channelId}/messages/stream`);
+		es.onmessage = (ev) => {
+			try {
+				const data = JSON.parse(ev.data) as {
+					type: 'insert' | 'update' | 'delete';
+					message?: Message;
+					id?: string;
+				};
+				queryClient.setQueryData<Message[]>(queryKey, (prev) => {
+					const current = Array.isArray(prev) ? prev.slice() : [];
+					if (data.type === 'insert' && data.message) {
+						if (current.some((m) => m._id === data.message!._id))
+							return current;
+						const tempIndex = current.findIndex(
+							(m) =>
+								m._id.startsWith('temp-') &&
+								m.content === data.message!.content &&
+								m.authorId === data.message!.authorId
+						);
+						if (tempIndex !== -1) current.splice(tempIndex, 1);
+						current.push(data.message!);
+						return current;
+					}
+					if (data.type === 'update' && data.message) {
+						return current.map((m) =>
+							m._id === data.message!._id ? { ...m, ...data.message } : m
+						);
+					}
+
+					return current;
+				});
+			} catch {}
+		};
+		es.onerror = () => {
+			es.close();
+		};
+		return () => {
+			es.close();
+		};
+	}, [channelId, queryClient, queryKey]);
 
 	const sendMutation = useMutation({
 		mutationFn: async ({

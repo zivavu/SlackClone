@@ -53,6 +53,9 @@ export async function PATCH(
 	const db = await getDb();
 	await db
 		.collection('messages')
-		.updateOne({ _id: new ObjectId(id) }, { $set: { content: body.content } });
+		.updateOne(
+			{ _id: new ObjectId(id) },
+			{ $set: { content: body.content, updatedAt: new Date() } }
+		);
 	return NextResponse.json({ ok: true });
 }
