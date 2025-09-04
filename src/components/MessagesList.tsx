@@ -4,7 +4,38 @@ import { authClient } from '@/lib/auth-client';
 import { Pencil, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+
+function isSameCalendarDay(a: Date, b: Date) {
+	return (
+		a.getFullYear() === b.getFullYear() &&
+		a.getMonth() === b.getMonth() &&
+		a.getDate() === b.getDate()
+	);
+}
+
+function getOrdinalSuffix(n: number) {
+	const j = n % 10;
+	const k = n % 100;
+	if (j === 1 && k !== 11) return 'st';
+	if (j === 2 && k !== 12) return 'nd';
+	if (j === 3 && k !== 13) return 'rd';
+	return 'th';
+}
+
+function getDateLabel(date: Date) {
+	const today = new Date();
+	const yesterday = new Date();
+	yesterday.setDate(today.getDate() - 1);
+
+	if (isSameCalendarDay(date, today)) return 'Today';
+	if (isSameCalendarDay(date, yesterday)) return 'Yesterday';
+
+	const weekday = date.toLocaleDateString('en-US', { weekday: 'long' });
+	const month = date.toLocaleDateString('en-US', { month: 'long' });
+	const day = date.getDate();
+	return `${weekday}, ${month} ${day}${getOrdinalSuffix(day)}`;
+}
 
 export type Message = {
 	_id: string;
@@ -93,90 +124,112 @@ export function MessagesList({
 						!prev ||
 						prev.authorId !== message.authorId ||
 						createdAtMs - prevCreatedAtMs >= fiveMinutesMs;
+
+					const currentDate = new Date(message.createdAt);
+					const prevDate = prev ? new Date(prev.createdAt) : null;
+					const showDaySeparator =
+						!prev || (prevDate && !isSameCalendarDay(currentDate, prevDate));
+
 					return (
-						<li
-							key={message._id}
-							className="flex items-center gap-3 group hover:bg-foreground/5 px-3 sm:px-4 py-1">
-							{showAvatar ? (
-								avatarLookup?.[message.authorId] ? (
-									<Image
-										src={avatarLookup[message.authorId] as string}
-										alt={message.authorName}
-										className="size-9 shrink-0 rounded object-cover"
-										width={36}
-										height={36}
-									/>
-								) : (
-									<div className="size-9 shrink-0 rounded bg-foreground/10 grid place-items-center text-xs font-medium">
-										{message?.authorName?.split(' ')[0]?.[0]}
-										{message?.authorName?.split(' ')[1]?.[0]}
-									</div>
-								)
-							) : (
-								<div className="w-9 shrink-0" />
-							)}
-							<div className="min-w-0 flex-1 relative">
-								{showAvatar && (
-									<div className="flex items-baseline gap-2">
-										<p className="text-sm font-semibold leading-none">
-											{message.authorName}
-										</p>
-										<span className="text-[11px] text-muted-foreground">
-											{new Date(message.createdAt).toLocaleTimeString('en-US', {
-												hour: 'numeric',
-												minute: '2-digit',
-											})}
-										</span>
-									</div>
-								)}
-								{editingId === message._id ? (
-									<div className="mt-1">
-										<textarea
-											className="w-full rounded bg-input px-2 py-1 text-[15px] outline-none focus:ring-2 focus:ring-ring/20"
-											rows={2}
-											value={draft}
-											onChange={(e) => setDraft(e.target.value)}
+						<Fragment key={message._id}>
+							{showDaySeparator ? (
+								<li className="my-4 flex items-center">
+									<div className="h-px bg-border flex-1" />
+									<span className="shrink-0 rounded-full border border-border px-3 py-1 text-sm font-bold text-muted-foreground">
+										{getDateLabel(currentDate)}
+									</span>
+									<div className="h-px bg-border flex-1" />
+								</li>
+							) : null}
+							<li
+								key={message._id}
+								className="flex items-center gap-3 group hover:bg-foreground/5 px-3 sm:px-4 py-1">
+								{showAvatar ? (
+									avatarLookup?.[message.authorId] ? (
+										<Image
+											src={avatarLookup[message.authorId] as string}
+											alt={message.authorName}
+											className="size-9 shrink-0 rounded object-cover"
+											width={36}
+											height={36}
 										/>
-										<div className="mt-1 flex items-center gap-2">
-											<button
-												onClick={() => saveEdit(message._id)}
-												className="px-2 py-1 rounded bg-primary text-primary-foreground text-sm">
-												Save
-											</button>
-											<button
-												onClick={() => setEditingId(null)}
-												className="px-2 py-1 rounded bg-foreground/10 text-sm">
-												Cancel
-											</button>
+									) : (
+										<div className="size-9 shrink-0 rounded bg-foreground/10 grid place-items-center text-xs font-medium">
+											{message?.authorName?.split(' ')[0]?.[0]}
+											{message?.authorName?.split(' ')[1]?.[0]}
 										</div>
-									</div>
+									)
 								) : (
-									<p className="mt-1 text-[15px] leading-6 whitespace-pre-wrap break-words">
-										{renderWithMentions(message.content)}
-									</p>
+									<div className="w-9 shrink-0" />
 								)}
-								<div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-0 -translate-y-2 ">
-									{isOwner ? (
-										<div className="flex items-center gap-1 rounded-full bg-background/80 backdrop-blur px-1.5 py-1 border border-border shadow">
-											<button
-												type="button"
-												title="Edit"
-												onClick={() => startEdit(message._id, message.content)}
-												className="p-1 rounded text-[12px] hover:bg-foreground/30">
-												<Pencil className="size-4" aria-hidden />
-											</button>
-											<button
-												type="button"
-												title="Delete"
-												onClick={() => onDelete?.(message._id)}
-												className="p-1 rounded hover:bg-foreground/30">
-												<Trash2 className="size-4" aria-hidden />
-											</button>
+								<div className="min-w-0 flex-1 relative">
+									{showAvatar && (
+										<div className="flex items-baseline gap-2">
+											<p className="text-sm font-semibold leading-none">
+												{message.authorName}
+											</p>
+											<span className="text-[11px] text-muted-foreground">
+												{new Date(message.createdAt).toLocaleTimeString(
+													'en-US',
+													{
+														hour: 'numeric',
+														minute: '2-digit',
+													}
+												)}
+											</span>
 										</div>
-									) : null}
+									)}
+									{editingId === message._id ? (
+										<div className="mt-1">
+											<textarea
+												className="w-full rounded bg-input px-2 py-1 text-[15px] outline-none focus:ring-2 focus:ring-ring/20"
+												rows={2}
+												value={draft}
+												onChange={(e) => setDraft(e.target.value)}
+											/>
+											<div className="mt-1 flex items-center gap-2">
+												<button
+													onClick={() => saveEdit(message._id)}
+													className="px-2 py-1 rounded bg-primary text-primary-foreground text-sm">
+													Save
+												</button>
+												<button
+													onClick={() => setEditingId(null)}
+													className="px-2 py-1 rounded bg-foreground/10 text-sm">
+													Cancel
+												</button>
+											</div>
+										</div>
+									) : (
+										<p className="mt-1 text-[15px] leading-6 whitespace-pre-wrap break-words">
+											{renderWithMentions(message.content)}
+										</p>
+									)}
+									<div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-0 -translate-y-2 ">
+										{isOwner ? (
+											<div className="flex items-center gap-1 rounded-full bg-background/80 backdrop-blur px-1.5 py-1 border border-border shadow">
+												<button
+													type="button"
+													title="Edit"
+													onClick={() =>
+														startEdit(message._id, message.content)
+													}
+													className="p-1 rounded text-[12px] hover:bg-foreground/30">
+													<Pencil className="size-4" aria-hidden />
+												</button>
+												<button
+													type="button"
+													title="Delete"
+													onClick={() => onDelete?.(message._id)}
+													className="p-1 rounded hover:bg-foreground/30">
+													<Trash2 className="size-4" aria-hidden />
+												</button>
+											</div>
+										) : null}
+									</div>
 								</div>
-							</div>
-						</li>
+							</li>
+						</Fragment>
 					);
 				})}
 			</ol>
