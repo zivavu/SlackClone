@@ -1,9 +1,8 @@
 'use client';
 
+import { Status } from '@/app/api/direct-messages/actions';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-
-type Status = 'online' | 'away' | 'offline';
 
 export function UserAvatar({
 	src,
@@ -18,8 +17,7 @@ export function UserAvatar({
 	showStatus?: boolean;
 	status?: Status;
 }) {
-	const color =
-		status === 'online' ? '#22c55e' : status === 'away' ? '#f59e0b' : '#6b7280';
+	const color = status === 'online' ? '#22c55e' : '#6b7280';
 	return (
 		<span
 			className={cn(

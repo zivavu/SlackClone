@@ -253,11 +253,7 @@ export function ChannelsSidebar({ channels, directMessages }: Props) {
 												className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full border border-black/60"
 												style={{
 													backgroundColor:
-														dm.status === 'online'
-															? '#22c55e'
-															: dm.status === 'away'
-															? '#f59e0b'
-															: '#6b7280',
+														dm.status === 'online' ? '#22c55e' : '#6b7280',
 												}}
 											/>
 										</span>

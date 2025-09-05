@@ -23,8 +23,7 @@ export function useDirectMessages(initialData: DirectMessageUser[]) {
 			const last = new Date(lastSeenAt).getTime();
 			if (!last) return 'offline';
 			const diff = Date.now() - last;
-			if (diff <= 35000) return 'online';
-			if (diff <= 5 * 60000) return 'away';
+			if (diff <= 1 * 60 * 1000) return 'online';
 			return 'offline';
 		}
 

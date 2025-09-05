@@ -1,15 +1,16 @@
 import { getDb } from '@/lib/mongodb';
 import type { ChangeStream, ChangeStreamDocument } from 'mongodb';
+import { Status } from '../../direct-messages/actions';
 
 type PresenceEvent = {
 	userId: string;
-	status?: 'online' | 'away' | 'offline';
+	status?: Status;
 	lastSeenAt?: string;
 };
 
 type PresenceDoc = {
 	userId: string;
-	status?: 'online' | 'away' | 'offline';
+	status?: Status;
 	lastSeenAt?: Date | string;
 };
 

@@ -3,6 +3,8 @@
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
@@ -26,9 +28,9 @@ export function ProfileDialog({
 	const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(null);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
 	useEffect(() => {
-		if (!open) return;
 		void (async () => {
 			const res = await fetch('/api/users/me');
 			if (res.ok) {
@@ -93,11 +95,14 @@ export function ProfileDialog({
 		}
 	}
 
-	async function onDeleteAccount() {
-		if (!confirm('Permanently delete your account? This cannot be undone.'))
-			return;
+	function onDeleteAccount() {
+		setShowDeleteConfirm(true);
+	}
+
+	async function confirmDeleteAccount() {
 		const res = await fetch('/api/users/delete', { method: 'DELETE' });
 		if (res.ok) {
+			setShowDeleteConfirm(false);
 			onOpenChange(false);
 			router.push('/signin');
 		}
@@ -153,27 +158,53 @@ export function ProfileDialog({
 						Ready to upload: {selectedFile.name}
 					</p>
 				) : null}
-				<div className="flex justify-between gap-2 mt-4">
+
+				<div className="flex justify-end gap-2 mt-6">
+					<button
+						onClick={() => onOpenChange(false)}
+						className="rounded px-3 py-2 text-sm hover:bg-white/10">
+						Cancel
+					</button>
+					<button
+						disabled={saving}
+						onClick={onSave}
+						className="rounded bg-white/10 px-3 py-2 text-sm hover:bg-white/15 disabled:opacity-50">
+						{saving ? 'Saving…' : 'Save'}
+					</button>
+				</div>
+
+				<div className="border-t border-white/10 pt-4 mt-4">
 					<button
 						onClick={onDeleteAccount}
-						className="rounded px-3 py-2 text-sm bg-red-600/20 hover:bg-red-600/30 text-red-200">
+						className="rounded px-3 py-2 text-sm bg-red-600/20 hover:bg-red-600/30 text-red-200 transition-colors">
 						Delete account
 					</button>
-					<div className="flex gap-2">
+				</div>
+			</DialogContent>
+
+			<Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+				<DialogContent className="max-w-md">
+					<DialogHeader>
+						<DialogTitle>Delete Account</DialogTitle>
+						<DialogDescription>
+							Are you sure you want to permanently delete your account? This
+							action cannot be undone and will remove all your data.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter className="gap-2 sm:gap-2">
 						<button
-							onClick={() => onOpenChange(false)}
-							className="rounded px-3 py-2 text-sm hover:bg-white/10">
+							onClick={() => setShowDeleteConfirm(false)}
+							className="rounded px-4 py-2 text-sm hover:bg-white/10 transition-colors">
 							Cancel
 						</button>
 						<button
-							disabled={saving}
-							onClick={onSave}
-							className="rounded bg-white/10 px-3 py-2 text-sm hover:bg-white/15 disabled:opacity-50">
-							{saving ? 'Saving…' : 'Save'}
+							onClick={confirmDeleteAccount}
+							className="rounded px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white transition-colors">
+							Delete Account
 						</button>
-					</div>
-				</div>
-			</DialogContent>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</Dialog>
 	);
 }
