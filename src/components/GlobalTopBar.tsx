@@ -1,11 +1,16 @@
 'use client';
 
 import { authClient } from '@/lib/auth-client';
+import { MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
 
-export function GlobalTopBar() {
+type Props = {
+	onToggleSidebar?: () => void;
+};
+
+export function GlobalTopBar({ onToggleSidebar }: Props) {
 	const router = useRouter();
 	const [busy, setBusy] = useState(false);
 
@@ -20,16 +25,10 @@ export function GlobalTopBar() {
 		<header className="h-12 shrink-0 text-white">
 			<div className="h-full px-3 sm:px-4 flex items-center gap-2">
 				<button
+					onClick={onToggleSidebar}
 					className="md:hidden p-1.5 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-					title="Toggle sidebar">
-					<svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden>
-						<path
-							d="M4 7h16M4 12h10M4 17h16"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-						/>
-					</svg>
+					title="Open channels menu">
+					<MessageSquare className="size-5" />
 				</button>
 
 				<div className="flex-1 flex justify-center">

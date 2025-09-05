@@ -4,6 +4,7 @@ import { DirectMessageUser } from '@/app/api/direct-messages/actions';
 import { AppNavSidebar } from '@/components/AppNavSidebar';
 import { ChannelHeader } from '@/components/ChannelHeader';
 import { ChannelsSidebar } from '@/components/ChannelsSidebar/ChannelsSidebar';
+import { MobileChannelsSidebar } from '@/components/ChannelsSidebar/MobileChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
 import { MessagesList, type Message } from '@/components/MessagesList';
@@ -12,7 +13,7 @@ import { useChannelMessages } from '@/hooks/useChannelMessages';
 import { useDirectMessages } from '@/hooks/useDirectMessages';
 import { usePresenceHeartbeat } from '@/hooks/usePresenceHeartbeat';
 import { authClient } from '@/lib/auth-client';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export default function ClientView({
 	channel,
@@ -25,6 +26,8 @@ export default function ClientView({
 	directMessages: DirectMessageUser[];
 	initialMessages: Message[];
 }) {
+	const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
 	const { id: channelId, name: channelName, topic: channelTopic } = channel;
 	const { data: session } = authClient.useSession();
 
@@ -66,7 +69,15 @@ export default function ClientView({
 
 	return (
 		<div className="h-svh flex flex-col bg-gradient-to-b dark:from-[#330d38] dark:to-[#230525] from-[#390b3a] to-[#370838] text-foreground">
-			<GlobalTopBar />
+			<GlobalTopBar
+				onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+			/>
+			<MobileChannelsSidebar
+				isOpen={mobileSidebarOpen}
+				onClose={() => setMobileSidebarOpen(false)}
+				channels={channelLinks}
+				directMessages={dmList}
+			/>
 			<div className="flex-1 flex min-h-0 mb-1">
 				<AppNavSidebar />
 				<div className="flex-1 flex dark:border border-border rounded-sm overflow-hidden">

@@ -1,69 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Slack Clone (Next.js + MongoDB)
 
-## Features
+Modern Slack-like chat built with Next.js App Router, MongoDB, and Better Auth. Uses Bun for package management and scripts.
 
-- **Authentication**: Email/password and GitHub OAuth login
-- **Real-time messaging**: Slack-like chat interface
-- **Channel-based communication**: Organize conversations by topics
-- **MongoDB integration**: Persistent data storage
+### Highlights
+
+- **Auth**: Email/password + GitHub OAuth via Better Auth
+- **Channels**: Create/delete channels; per-channel message history
+- **Messaging**: Send, edit, and delete messages
+- **Realtime**: Server-Sent Events (SSE) for channel messages and presence
+- **Presence**: Online status via heartbeat + realtime stream
+- **Files/Avatars**: Upload and serve images via MongoDB GridFS + Sharp
+- **UI/UX**: React 19, Tailwind CSS v4, Radix UI, Lucide Icons, dark mode
+
+### Tech Stack
+
+- Next.js 15 (App Router), React 19, TypeScript
+- TanStack Query for data fetching/caching
+- Better Auth + MongoDB adapter
+- MongoDB (driver v6), GridFS for file storage
+- Tailwind CSS v4, Radix UI, lucide-react, next-themes
+
+---
 
 ## Getting Started
 
-### 1. Environment Setup
+We use Bun for everything.
 
-Follow the detailed setup instructions in [`ENV_SETUP.md`](./ENV_SETUP.md) to configure GitHub OAuth and other environment variables.
-
-### 2. Install Dependencies
+1. Install dependencies
 
 ```bash
 bun install
 ```
 
-### 3. Run Development Server
+2. Configure environment
+
+Create `.env.local` in the project root:
+
+```env
+# MongoDB
+MONGODB_URI=mongodb+srv://<user>:<pass>@<host>/<db>?retryWrites=true&w=majority
+MONGODB_DB=slack_clone
+
+# Auth (Better Auth + GitHub)
+BETTER_AUTH_SECRET=your_secret
+BETTER_AUTH_URL=your_url
+
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_CLIENT_SECRET=your_client_secret
+```
+
+3. Run the dev server
 
 ```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-### 4. Test GitHub Login
+4. Build and run production locally
 
-1. Visit `http://localhost:3000/login`
-2. Click the "Continue with GitHub" button
-3. Complete GitHub OAuth flow
-4. You should be redirected to the client area
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Environment
-
-Create a `.env.local` file with your secrets.
-
-GitHub OAuth (Better Auth):
-
-```
-GITHUB_CLIENT_ID=your_client_id
-GITHUB_CLIENT_SECRET=your_client_secret
+```bash
+bun build
+bun start
 ```
 
-Dev callback URL:
+Lint:
 
+```bash
+bun lint
 ```
-http://localhost:3000/api/auth/callback/github
-```
+
+---
+
+## Realtime
+
+- Channel messages: SSE at `/api/channels/:channelId/messages/stream`
+- Presence: SSE at `/api/presence/stream`
+
+Client hooks consuming these streams:
+
+- `src/hooks/useChannelMessages.ts`
+- `src/hooks/usePresenceHeartbeat.ts`
+
+---
+
+## Data Model (MongoDB)
+
+- `channels` — `{ _id, name, topic?, createdAt }`
+- `messages` — `{ _id, channelId, content, authorId?, authorName?, mentions?, createdAt, updatedAt? }`
+- `user` — `{ _id, name?, image? }` (managed by Better Auth)
+- `presence` — `{ _id, userId, lastSeenAt, status? }`
+- GridFS bucket `uploads` — stores avatar images (webp)
+
+Seed helpers exist in `src/app/api/channels/actions.ts` (`seedDefaultChannels`). You can POST to `/api/channels` to create channels.
+
+---
+
+## License
+
+MIT
