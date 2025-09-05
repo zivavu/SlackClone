@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@/components/theme-provider';
 import type { Metadata } from 'next';
 import { Geist_Mono, Lato } from 'next/font/google';
 import './globals.css';
@@ -28,15 +29,15 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<head>
-				<script
-					dangerouslySetInnerHTML={{
-						__html: `(() => { try { const k = 'theme'; const s = localStorage.getItem(k); const m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; const t = s || (m ? 'dark' : 'light'); if (t === 'dark') document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark'); } catch(_) {} })();`,
-					}}
-				/>
-			</head>
+			<head />
 			<body className={`${lato.variable} ${geistMono.variable} antialiased`}>
-				<ReactQueryProvider>{children}</ReactQueryProvider>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange>
+					<ReactQueryProvider>{children}</ReactQueryProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

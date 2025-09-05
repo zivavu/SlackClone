@@ -1,11 +1,12 @@
 'use client';
 
+import { useTheme } from 'next-themes';
+
 export default function ThemeToggle() {
+	const { theme, setTheme } = useTheme();
+
 	function handleToggle() {
-		if (typeof document === 'undefined') return;
-		const root = document.documentElement;
-		const next = root.classList.contains('dark') ? 'light' : 'dark';
-		root.classList.toggle('dark', next === 'dark');
+		setTheme(theme === 'dark' ? 'light' : 'dark');
 	}
 
 	return (
