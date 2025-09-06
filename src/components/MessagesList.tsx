@@ -1,6 +1,7 @@
 'use client';
 
 import { authClient } from '@/lib/auth-client';
+import type { Message } from '@/types/chat';
 import { Pencil, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -37,26 +38,18 @@ function getDateLabel(date: Date) {
 	return `${weekday}, ${month} ${day}${getOrdinalSuffix(day)}`;
 }
 
-export type Message = {
-	_id: string;
-	authorName: string;
-	authorId: string;
-	createdAt: string;
-	updatedAt?: string;
-	content: string;
-	mentions?: string[];
-};
+// Message type moved to shared types
 
 export function MessagesList({
 	messages,
-	onDelete,
-	onEdit,
+	onDeleteAction,
+	onEditAction,
 	mentionLookup,
 	avatarLookup,
 }: {
 	messages: Message[];
-	onDelete?: (id: string) => void | Promise<void>;
-	onEdit?: (id: string, content: string) => void | Promise<void>;
+	onDeleteAction?: (id: string) => void | Promise<void>;
+	onEditAction?: (id: string, content: string) => void | Promise<void>;
 	mentionLookup?: Record<string, string>;
 	avatarLookup?: Record<string, string | undefined>;
 }) {
@@ -71,8 +64,8 @@ export function MessagesList({
 	}
 
 	async function saveEdit(id: string) {
-		if (!onEdit) return setEditingId(null);
-		await onEdit(id, draft);
+		if (!onEditAction) return setEditingId(null);
+		await onEditAction(id, draft);
 		setEditingId(null);
 	}
 
@@ -109,7 +102,7 @@ export function MessagesList({
 		const el = containerRef.current;
 		if (!el) return;
 		el.scrollTop = el.scrollHeight;
-	}, [messages]);
+	}, [messages, session?.user.id]);
 
 	return (
 		<section ref={containerRef} className="flex-1 overflow-y-auto py-4">
@@ -220,7 +213,7 @@ export function MessagesList({
 												<button
 													type="button"
 													title="Delete"
-													onClick={() => onDelete?.(message._id)}
+													onClick={() => onDeleteAction?.(message._id)}
 													className="p-1 rounded hover:bg-foreground/30">
 													<Trash2 className="size-4" aria-hidden />
 												</button>

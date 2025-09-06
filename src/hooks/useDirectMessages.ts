@@ -1,4 +1,4 @@
-import type { DirectMessageUser } from '@/app/api/direct-messages/actions';
+import type { DirectMessageUser } from '@/types/chat';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 

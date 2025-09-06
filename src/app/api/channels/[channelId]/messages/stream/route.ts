@@ -1,7 +1,8 @@
 'use server';
 
-import type { Message } from '@/components/MessagesList';
 import { getDb } from '@/lib/mongodb';
+import { toSse } from '@/lib/sse';
+import type { Message } from '@/types/chat';
 import type { ChangeStream } from 'mongodb';
 import { ObjectId } from 'mongodb';
 
@@ -9,11 +10,6 @@ type SseEvent =
 	| { type: 'insert'; message: Message }
 	| { type: 'update'; message: Message }
 	| { type: 'delete'; id: string };
-
-function toSse(event: SseEvent): string {
-	const payload = JSON.stringify(event);
-	return `data: ${payload}\n\n`;
-}
 
 export async function GET(
 	_req: Request,
@@ -57,12 +53,20 @@ export async function GET(
 				} catch {
 					cleanup();
 				}
-			}, 15000);
+			}, 20000);
 
 			const pipeline = [
 				{
 					$match: {
 						operationType: { $in: ['insert', 'update', 'replace', 'delete'] },
+					},
+				},
+				{
+					$match: {
+						$or: [
+							{ operationType: 'delete' },
+							{ 'fullDocument.channelId': channelId },
+						],
 					},
 				},
 			];

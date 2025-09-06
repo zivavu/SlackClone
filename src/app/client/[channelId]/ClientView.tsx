@@ -1,18 +1,18 @@
 'use client';
 
-import { DirectMessageUser } from '@/app/api/direct-messages/actions';
 import { AppNavSidebar } from '@/components/AppNavSidebar';
 import { ChannelHeader } from '@/components/ChannelHeader';
 import { ChannelsSidebar } from '@/components/ChannelsSidebar/ChannelsSidebar';
 import { MobileChannelsSidebar } from '@/components/ChannelsSidebar/MobileChannelsSidebar';
 import { Composer } from '@/components/Composer';
 import { GlobalTopBar } from '@/components/GlobalTopBar';
-import { MessagesList, type Message } from '@/components/MessagesList';
+import { MessagesList } from '@/components/MessagesList';
 import { defaultChannels } from '@/data/channels';
 import { useChannelMessages } from '@/hooks/useChannelMessages';
 import { useDirectMessages } from '@/hooks/useDirectMessages';
 import { usePresenceHeartbeat } from '@/hooks/usePresenceHeartbeat';
 import { authClient } from '@/lib/auth-client';
+import type { DirectMessageUser, Message } from '@/types/chat';
 import { useMemo, useState } from 'react';
 
 export default function ClientView({
@@ -94,8 +94,8 @@ export default function ClientView({
 						/>
 						<MessagesList
 							messages={messages}
-							onDelete={(id) => deleteMessage(id)}
-							onEdit={(id, content) => editMessage(id, content)}
+							onDeleteAction={(id) => deleteMessage(id)}
+							onEditAction={(id, content) => editMessage(id, content)}
 							mentionLookup={Object.fromEntries(
 								dmList.map((u) => [u.id, u.name])
 							)}

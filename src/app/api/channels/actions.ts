@@ -20,17 +20,14 @@ export async function getChannels() {
 export async function createChannel({
 	name,
 	topic,
-	id,
 }: {
 	name: string;
 	topic?: string;
-	id?: string;
 }) {
 	const db = await getDb();
 	const result = await db.collection('channels').insertOne({
 		name,
 		topic,
-		id,
 		createdAt: new Date(),
 		updatedAt: new Date(),
 	});

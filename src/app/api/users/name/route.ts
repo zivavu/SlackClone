@@ -1,15 +1,12 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { getUserId } from '@/lib/auth-helpers';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
 
 export async function PATCH(request: Request) {
-	const session = await auth.api
-		.getSession({ headers: request.headers })
-		.catch(() => null);
-	const userId = session?.user?.id as string | undefined;
+	const userId = await getUserId(request);
 	if (!userId)
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

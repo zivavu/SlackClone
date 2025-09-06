@@ -1,7 +1,7 @@
 'use server';
 
-import { Message } from '@/components/MessagesList';
 import { getDb } from '@/lib/mongodb';
+import type { Message } from '@/types/chat';
 
 export async function getChannelMessages(
 	channelId: string

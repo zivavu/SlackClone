@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 type CallbackCtx = { error: { message: string } };
 type FormValues = { email: string; password: string };
 
-export default function LoginPage() {
+export default function SignInPage() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 

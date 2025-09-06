@@ -1,15 +1,7 @@
 'use server';
 
 import { getDb } from '@/lib/mongodb';
-
-export type Status = 'online' | 'offline';
-
-export type DirectMessageUser = {
-	id: string;
-	name: string;
-	status: Status;
-	image?: string;
-};
+import type { DirectMessageUser, Status } from '@/types/chat';
 
 type PresenceRow = {
 	userId: string;

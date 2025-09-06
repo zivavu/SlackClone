@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { getUserId } from '@/lib/auth-helpers';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
@@ -11,10 +11,7 @@ export async function DELETE(
 ) {
 	const { id } = await context.params;
 	if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-	const session = await auth.api
-		.getSession({ headers: request.headers })
-		.catch(() => null);
-	const requesterId = session?.user?.id as string | undefined;
+	const requesterId = await getUserId(request);
 	if (!requesterId)
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -40,17 +37,19 @@ export async function PATCH(
 	if (!body || typeof body.content !== 'string') {
 		return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
 	}
-	const session = await auth.api
-		.getSession({ headers: request.headers })
-		.catch(() => null);
-	const requesterId = session?.user?.id as string | undefined;
+	const requesterId = await getUserId(request);
 	if (!requesterId)
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-	if (requesterId !== body.authorId) {
+	const db = await getDb();
+	const existing = await db
+		.collection('messages')
+		.findOne<{ authorId?: string }>({ _id: new ObjectId(id) });
+	if (!existing)
+		return NextResponse.json({ error: 'Not found' }, { status: 404 });
+	if (existing.authorId !== requesterId) {
 		return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 	}
-	const db = await getDb();
 	await db
 		.collection('messages')
 		.updateOne(

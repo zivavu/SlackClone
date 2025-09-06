@@ -1,5 +1,6 @@
 'use server';
 
+import { getUserId } from '@/lib/auth-helpers';
 import { getDb } from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
 
@@ -13,12 +14,17 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: 'Invalid body' }, { status: 400 });
 	}
 
+	const authorId = await getUserId(request);
+	if (!authorId) {
+		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	}
+
 	const db = await getDb();
 	const doc = {
 		channelId: body.channelId,
 		content: body.content,
 		authorName: body.authorName,
-		authorId: body.authorId,
+		authorId,
 		image: body.image,
 		mentions: Array.isArray(body.mentions) ? body.mentions : undefined,
 		createdAt: new Date(),
@@ -30,7 +36,7 @@ export async function POST(request: Request) {
 		channelId: body.channelId,
 		content: body.content,
 		authorName: body.authorName,
-		authorId: body.authorId,
+		authorId,
 		mentions: doc.mentions,
 		createdAt: new Date().toISOString(),
 	});

@@ -1,4 +1,4 @@
-import type { Message } from '@/components/MessagesList';
+import type { Message } from '@/types/chat';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 
@@ -53,6 +53,9 @@ export function useChannelMessages(params: {
 						return current.map((m) =>
 							m._id === data.message!._id ? { ...m, ...data.message } : m
 						);
+					}
+					if (data.type === 'delete' && data.id) {
+						return current.filter((m) => m._id !== data.id);
 					}
 					return current;
 				});

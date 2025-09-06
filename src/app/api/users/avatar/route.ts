@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/lib/auth';
+import { getUserId } from '@/lib/auth-helpers';
 import { getGridFsBucket } from '@/lib/gridfs';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
@@ -8,10 +8,7 @@ import { NextResponse } from 'next/server';
 import sharp from 'sharp';
 
 export async function POST(request: Request) {
-	const session = await auth.api
-		.getSession({ headers: request.headers })
-		.catch(() => null);
-	const userId = session?.user?.id as string | undefined;
+	const userId = await getUserId(request);
 	if (!userId)
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -55,7 +52,7 @@ export async function POST(request: Request) {
 			);
 
 		return NextResponse.json({ fileId, url: `/api/files/${fileId}` });
-	} catch (_e) {
+	} catch {
 		return NextResponse.json({ error: 'Failed to upload' }, { status: 500 });
 	}
 }

@@ -1,6 +1,7 @@
 import { getDb } from '@/lib/mongodb';
+import { toSse as toSseShared } from '@/lib/sse';
+import type { Status } from '@/types/chat';
 import type { ChangeStream, ChangeStreamDocument } from 'mongodb';
-import { Status } from '../../direct-messages/actions';
 
 type PresenceEvent = {
 	userId: string;
@@ -14,9 +15,7 @@ type PresenceDoc = {
 	lastSeenAt?: Date | string;
 };
 
-function toSse(data: PresenceEvent) {
-	return `data: ${JSON.stringify(data)}\n\n`;
-}
+// use shared SSE serializer
 
 export async function GET() {
 	const db = await getDb();
@@ -71,7 +70,7 @@ export async function GET() {
 							: undefined,
 					};
 					try {
-						controller.enqueue(enc.encode(toSse(evt)));
+						controller.enqueue(enc.encode(toSseShared(evt)));
 					} catch {
 						cleanup();
 					}
