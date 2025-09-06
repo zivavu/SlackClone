@@ -1,6 +1,6 @@
 'use client';
 
-import { Status } from '@/app/api/direct-messages/actions';
+import { Status } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 

@@ -1,12 +1,12 @@
 'use client';
 
-import { DirectMessageUser } from '@/app/api/direct-messages/actions';
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { authClient } from '@/lib/auth-client';
+import { DirectMessageUser } from '@/types/chat';
 import { Headphones, MessageSquare, Pencil } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

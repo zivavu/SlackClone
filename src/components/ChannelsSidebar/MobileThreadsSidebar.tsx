@@ -1,6 +1,6 @@
 'use client';
 
-import { DirectMessageUser } from '@/app/api/direct-messages/actions';
+import { DirectMessageUser } from '@/types/chat';
 import { authClient } from '@/lib/auth-client';
 import { Headphones, MessageSquare, Pencil, X } from 'lucide-react';
 import Image from 'next/image';

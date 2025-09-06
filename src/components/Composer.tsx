@@ -1,7 +1,7 @@
 'use client';
 
-import type { DirectMessageUser } from '@/app/api/direct-messages/actions';
-import {
+import type { DirectMessageUser } from '@/types/chat';
+import {	
 	Popover,
 	PopoverAnchor,
 	PopoverContent,
